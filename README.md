@@ -1,11 +1,12 @@
-~/
-├─ .git/
-├─ .github/
-├─ .gitignore
-├─ README.md
-└─ LMS/
-   ├─ .vs/                              # Visual Studio workspace files (ignore)
-   ├─ LMS/                              # Actual project folder
+```text
+~/  
+├─ .git/  
+├─ .github/  
+├─ .gitignore  
+├─ README.md  
+└─ LMS/  
+   ├─ .vs/                              # Visual Studio workspace files (ignore)  
+   ├─ LMS/                              # Actual project folder  
    │   ├─ Properties/                   # Project properties and settings
    │   ├─ wwwroot/                      # Static files (CSS, JS, images)
    │   ├─ Areas/                        # Identity pages (login/register)
@@ -40,4 +41,4 @@ dbo.AspNetUsers and dbo.AspNetRoles
 The latter will be the table where user roles are stored (student/instructor)
 
 The Register page (inside /Areas/) will need to be edited to require more fields upon signing up, and the dbo.AspNetUsers table will need to be updated to include assignment required fields.
-
+```
