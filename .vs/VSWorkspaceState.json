@@ -2,7 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\LMS",
-    "\\LMS\\LMS"
+    "\\LMS\\LMS",
+    "\\LMS\\LMS\\Data"
   ],
   "SelectedNode": "\\LMS\\LMS.slnx",
   "PreviewInSolutionExplorer": false

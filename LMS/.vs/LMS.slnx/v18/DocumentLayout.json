@@ -1,105 +1,12 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|c:\\users\\jjput\\onedrive\\documents\\cs3750\\cs3750_group_2_lms\\lms\\lms\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|solutionrelative:lms\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|c:\\users\\jjput\\onedrive\\documents\\cs3750\\cs3750_group_2_lms\\lms\\lms\\areas\\identity\\pages\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|solutionrelative:lms\\areas\\identity\\pages\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|c:\\users\\jjput\\onedrive\\documents\\cs3750\\cs3750_group_2_lms\\lms\\lms\\pages\\shared\\_loginpartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|solutionrelative:lms\\pages\\shared\\_loginpartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|c:\\users\\jjput\\onedrive\\documents\\cs3750\\cs3750_group_2_lms\\lms\\lms\\data\\migrations\\00000000000000_createidentityschema.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|solutionrelative:lms\\data\\migrations\\00000000000000_createidentityschema.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|c:\\users\\jjput\\onedrive\\documents\\cs3750\\cs3750_group_2_lms\\lms\\lms\\pages\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E0AE40B2-0035-5EB3-B647-8A17B0EF43A6}|LMS\\LMS.csproj|solutionrelative:lms\\pages\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    }
-  ],
+  "WorkspaceRootPath": "C:\\Users\\JJPUt\\Documents\\CS3750_Group_2_LMS\\LMS\\",
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ApplicationDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Data\\ApplicationDbContext.cs",
-              "RelativeDocumentMoniker": "LMS\\Data\\ApplicationDbContext.cs",
-              "ToolTip": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Data\\ApplicationDbContext.cs",
-              "RelativeToolTip": "LMS\\Data\\ApplicationDbContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T17:10:07.791Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "_LoginPartial.cshtml",
-              "DocumentMoniker": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Pages\\Shared\\_LoginPartial.cshtml",
-              "RelativeDocumentMoniker": "LMS\\Pages\\Shared\\_LoginPartial.cshtml",
-              "ToolTip": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Pages\\Shared\\_LoginPartial.cshtml",
-              "RelativeToolTip": "LMS\\Pages\\Shared\\_LoginPartial.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-01-21T17:04:27.482Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Pages\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "LMS\\Pages\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Pages\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "LMS\\Pages\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-01-21T17:04:26.089Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "_ViewStart.cshtml",
-              "DocumentMoniker": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "RelativeDocumentMoniker": "LMS\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "ToolTip": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "RelativeToolTip": "LMS\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-01-21T17:04:20.165Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "00000000000000_CreateIdentitySchema.cs",
-              "DocumentMoniker": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Data\\Migrations\\00000000000000_CreateIdentitySchema.cs",
-              "RelativeDocumentMoniker": "LMS\\Data\\Migrations\\00000000000000_CreateIdentitySchema.cs",
-              "ToolTip": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\Data\\Migrations\\00000000000000_CreateIdentitySchema.cs",
-              "RelativeToolTip": "LMS\\Data\\Migrations\\00000000000000_CreateIdentitySchema.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAQwBUAAABCAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T17:04:15.203Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }

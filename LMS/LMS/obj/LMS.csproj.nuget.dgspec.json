@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj": {}
+    "C:\\Users\\JJPUt\\Documents\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj": {}
   },
   "projects": {
-    "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj": {
+    "C:\\Users\\JJPUt\\Documents\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj",
+        "projectUniqueName": "C:\\Users\\JJPUt\\Documents\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj",
         "projectName": "LMS",
-        "projectPath": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj",
+        "projectPath": "C:\\Users\\JJPUt\\Documents\\CS3750_Group_2_LMS\\LMS\\LMS\\LMS.csproj",
         "packagesPath": "C:\\Users\\JJPUt\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\JJPUt\\OneDrive\\Documents\\CS3750\\CS3750_Group_2_LMS\\LMS\\LMS\\obj\\",
+        "outputPath": "C:\\Users\\JJPUt\\Documents\\CS3750_Group_2_LMS\\LMS\\LMS\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -50,6 +49,28 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            },
+            "Microsoft.AspNetCore.Identity.UI": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "target": "Package",
+              "version": "[10.0.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
