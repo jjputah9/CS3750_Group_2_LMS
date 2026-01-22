@@ -25,6 +25,9 @@ project.assets.json
 # Rider / JetBrains
 .idea/
 
+# Ignore EF Core Migrations for local testing
+LMS/LMS/Data/Migrations/
+
 # Misc
 *.log
 *.vsidx
