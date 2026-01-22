@@ -1,27 +1,43 @@
-Note:  
-I am using  
-Visual Studio Enterprise 2026 18.2.1  
-I have Visual Studio Build Tools 2019 16.11.53  
-.NET 10.0.102  
-If the steps below do not fix your build errors, try using these versions instead  
-  
-  
-Open the project in Visual Studio  
-Right click on the project file (root, called LMS) and click 'Open in File Explorer'  
-In the File Explorer, right click again and open in terminal  
-Inside the terminal, run these commands one by one:  
-dotnet add package Microsoft.EntityFrameworkCore  
-dotnet add package Microsoft.EntityFrameworkCore.Relational  
-dotnet add package Microsoft.EntityFrameworkCore.Tools  
-dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore  
-dotnet add package Microsoft.EntityFrameworkCore.SqlServer  
-dotnet add package Microsoft.EntityFrameworkCore.Sqlite  
-dotnet restore    
+~/
+├─ .git/
+├─ .github/
+├─ .gitignore
+├─ README.md
+└─ LMS/
+   ├─ .vs/                              # Visual Studio workspace files (ignore)
+   ├─ LMS/                              # Actual project folder
+   │   ├─ Properties/                   # Project properties and settings
+   │   ├─ wwwroot/                      # Static files (CSS, JS, images)
+   │   ├─ Areas/                        # Identity pages (login/register)
+   │   ├─ Data/                         # Database context & EF Core setup
+   │   ├─ Pages/                        # Razor Pages (UI)
+   │   ├─ appsettings.Development.json  # Local dev configuration
+   │   └─ Program.cs                    # Application startup
+   └─ LMS.slnx                          # Visual Studio solution user data (ignore)
 
-Then close Visual Studio (may not be necessary)  
-Repoen the project  
-Right click LMS file  
-Clean  
-Rebuild    
 
-At this point my project worked, but if yours still doesn't try updating all your software to what I have listed above
+Inside the /Areas/ folder you will find /Areas/Pages/Account/...
+Inside this /Account/ folder are the pages for the Login and Register
+All other pages are found inside /Pages/
+
+
+To create a local database, after cloning the repo follow these steps:
+Open Package Manager Console (Tools - NuGet - Package Manager Console)
+Run:
+Add-Migration InitialIdentity
+Update-Database
+
+Then your (local) database will be created. Note that as of this branch, all tables are default. To view the tables, click
+(View - SQL Server Object Explorer) or (Ctrl+\, Ctrl+S)
+You should see a database called aspnet-LMS-a5f........
+Inside /Tables/ are a bunch of auto generated tables.
+dbo.AspNetUsers is the important one
+If you double click it, it will open a design page listing all the fields
+Note that fields such as birthdate are not included.
+
+dbo.AspNetUserRoles acts as a bridge between
+dbo.AspNetUsers and dbo.AspNetRoles
+The latter will be the table where user roles are stored (student/instructor)
+
+The Register page (inside /Areas/) will need to be edited to require more fields upon signing up, and the dbo.AspNetUsers table will need to be updated to include assignment required fields.
+
