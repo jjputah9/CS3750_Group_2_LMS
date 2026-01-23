@@ -1,0 +1,34 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.db
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.assets.json
+*.nuget.g.props
+*.nuget.g.targets
+
+# Rider / JetBrains
+.idea/
+
+# Ignore EF Core Migrations for local testing
+LMS/LMS/Data/Migrations/
+
+# Misc
+*.log
+*.vsidx
+*.sqlite
