@@ -1,0 +1,83 @@
+﻿@page
+@model LMS.Pages.Courses.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Course</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Course.Id" />
+            <div class="form-group">
+                <label asp-for="Course.InstructorId" class="control-label"></label>
+                <input asp-for="Course.InstructorId" class="form-control" />
+                <span asp-validation-for="Course.InstructorId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+<span class="text-danger">*</span>
+                <label asp-for="Course.DeptName" class="control-label"></label>
+                <input asp-for="Course.DeptName" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Course.DeptName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.CourseNum" class="control-label"></label>
+                <input asp-for="Course.CourseNum" class="form-control" />
+                <span asp-validation-for="Course.CourseNum" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+<span class="text-danger">*</span>
+                <label asp-for="Course.CourseTitle" class="control-label"></label>
+                <input asp-for="Course.CourseTitle" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Course.CourseTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.CreditHours" class="control-label"></label>
+                <input asp-for="Course.CreditHours" class="form-control" />
+                <span asp-validation-for="Course.CreditHours" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.Capacity" class="control-label"></label>
+                <input asp-for="Course.Capacity" class="form-control" />
+                <span asp-validation-for="Course.Capacity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.Location" class="control-label"></label>
+                <input asp-for="Course.Location" class="form-control" />
+                <span asp-validation-for="Course.Location" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+<span class="text-danger">*</span>
+                <label asp-for="Course.MeetDays" class="control-label"></label>
+                <input asp-for="Course.MeetDays" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Course.MeetDays" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.StartTime" class="control-label"></label>
+                <input asp-for="Course.StartTime" class="form-control" />
+                <span asp-validation-for="Course.StartTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.EndTime" class="control-label"></label>
+                <input asp-for="Course.EndTime" class="form-control" />
+                <span asp-validation-for="Course.EndTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
