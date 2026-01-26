@@ -51,10 +51,30 @@
                 <span asp-validation-for="Course.Location" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <span class="text-danger">*</span>
                 <label asp-for="Course.MeetDays" class="control-label"></label>
-                <input asp-for="Course.MeetDays" class="form-control" aria-required="true"/>
-                <span asp-validation-for="Course.MeetDays" class="text-danger"></span>
+                <ul>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[0]"/>
+                        <label asp-for="Course.MeetDays[0]">Monday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[1]"/>
+                        <label asp-for="Course.MeetDays[1]">Tuesday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[2]"/>
+                        <label asp-for="Course.MeetDays[2]">Wednesday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[3]"/>
+                        <label asp-for="Course.MeetDays[3]">Thursday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[4]" />
+                        <label asp-for="Course.MeetDays[4]">Friday</label>
+                    </li>
+                </ul>
+                <span asp-validation-for="Course.MeetDays" class="text-danger">@Model.MeetDayWarning</span>
             </div>
             <div class="form-group">
                 <label asp-for="Course.StartTime" class="control-label"></label>

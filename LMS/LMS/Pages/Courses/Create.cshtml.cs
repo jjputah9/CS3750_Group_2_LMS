@@ -27,13 +27,26 @@ namespace LMS.Pages.Courses
         [BindProperty]
         public Course Course { get; set; } = default!;
 
+        public string MeetDayWarning { get; set; } = "";
+
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            if (!Course.MeetDays.Contains(true))
+            {
+                MeetDayWarning = "At least one day needs to be selected.";
+                return Page();
+            }
+            else
+            {
+                MeetDayWarning = "";
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
+
 
             _context.Course.Add(Course);
             await _context.SaveChangesAsync();
