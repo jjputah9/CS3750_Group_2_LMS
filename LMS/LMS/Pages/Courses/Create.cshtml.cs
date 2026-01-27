@@ -47,6 +47,8 @@ namespace LMS.Pages.Courses
                 return Page();
             }
 
+            Course.InstructorEmail = User.Identity?.Name;
+
 
             _context.Course.Add(Course);
             await _context.SaveChangesAsync();

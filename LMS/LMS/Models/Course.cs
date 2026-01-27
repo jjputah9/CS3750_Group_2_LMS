@@ -7,8 +7,8 @@ public class Course
 {
     public int Id {get; set;} //Internal ID and unique primary key
 
-    //ADD FOREIGN KEY ATTRIBUTE WHEN USER MODEL IS UPDATED
-    public int InstructorId {get; set;} //Foreign key for the course instructor
+    [Required]
+    public string? InstructorEmail {get; set;} //Foreign key for the course instructor
 
     [Required]
     [StringLength(5)]

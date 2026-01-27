@@ -1,28 +1,35 @@
 ﻿@page
+@using LMS.models
 @model LMS.Pages.Courses.EditModel
+
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
     ViewData["Title"] = "Edit";
 }
 
+@if (SignInManager.IsSignedIn(User)){
 <h1>Edit</h1>
 
-<h4>Course</h4>
+<h4>Course (Instructor: @Model.Course.InstructorEmail)</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Course.Id" />
-            <div class="form-group">
-                <label asp-for="Course.InstructorId" class="control-label"></label>
-                <input asp-for="Course.InstructorId" class="form-control" />
-                <span asp-validation-for="Course.InstructorId" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="Course.InstructorEmail" value=@Model.Course.InstructorEmail>
             <div class="form-group">
 <span class="text-danger">*</span>
                 <label asp-for="Course.DeptName" class="control-label"></label>
-                <input asp-for="Course.DeptName" class="form-control" aria-required="true"/>
+                <select asp-for="Course.DeptName" class="form-control" aria-required="true">
+                    <option value="CS">CS</option>
+                    <option value="MATH">MATH</option>
+                    <option value="ART">ART</option>
+                    <option value="HIST">HIST</option>
+                    <option value="ENGL">ENGL</option>
+                    <option value="CHEM">CHEM</option>
+                </select>
                 <span asp-validation-for="Course.DeptName" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -52,10 +59,31 @@
                 <span asp-validation-for="Course.Location" class="text-danger"></span>
             </div>
             <div class="form-group">
-<span class="text-danger">*</span>
+            <div class="form-group">
                 <label asp-for="Course.MeetDays" class="control-label"></label>
-                <input asp-for="Course.MeetDays" class="form-control" aria-required="true"/>
-                <span asp-validation-for="Course.MeetDays" class="text-danger"></span>
+                <ul>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[0]"/>
+                        <label asp-for="Course.MeetDays[0]">Monday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[1]"/>
+                        <label asp-for="Course.MeetDays[1]">Tuesday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[2]"/>
+                        <label asp-for="Course.MeetDays[2]">Wednesday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[3]"/>
+                        <label asp-for="Course.MeetDays[3]">Thursday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[4]" />
+                        <label asp-for="Course.MeetDays[4]">Friday</label>
+                    </li>
+                </ul>
+                <span asp-validation-for="Course.MeetDays" class="text-danger">@Model.MeetDayWarning</span>
             </div>
             <div class="form-group">
                 <label asp-for="Course.StartTime" class="control-label"></label>
@@ -77,6 +105,13 @@
 <div>
     <a asp-page="./Index">Back to List</a>
 </div>
+
+}
+else{
+    <div class="text-center">
+        <p>Please <a href="/Identity/Account/Login">sign in</a> to edit courses.</p>
+    </div>
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

@@ -1,27 +1,34 @@
 ﻿@page
+@using LMS.models
 @model LMS.Pages.Courses.CreateModel
+@inject SignInManager<ApplicationUser> SignInManager
 
         @{
         ViewData["Title"] = "Create";
         }
         
         <h1>Create</h1>
+
+@if (SignInManager.IsSignedIn(User)){
         
-    <h4>Course</h4>
+    <h4>Add Course for @User.Identity?.Name</h4>
     <hr />
     <div class="row">
     <div class="col-md-4">
     <form method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Course.InstructorId" class="control-label"></label>
-                <input asp-for="Course.InstructorId" class="form-control" />
-                <span asp-validation-for="Course.InstructorId" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="Course.InstructorEmail" value="placeholder"/>
             <div class="form-group">
                 <span class="text-danger">*</span>
                 <label asp-for="Course.DeptName" class="control-label"></label>
-                <input asp-for="Course.DeptName" class="form-control" aria-required="true"/>
+                <select asp-for="Course.DeptName" class="form-control" aria-required="true">
+                    <option value="CS">CS</option>
+                    <option value="MATH">MATH</option>
+                    <option value="ART">ART</option>
+                    <option value="HIST">HIST</option>
+                    <option value="ENGL">ENGL</option>
+                    <option value="CHEM">CHEM</option>
+                </select>
                 <span asp-validation-for="Course.DeptName" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -96,6 +103,13 @@
 <div>
     <a asp-page="Index">Back to List</a>
 </div>
+
+}
+else{
+    <div class="text-center">
+        <p>Please <a href="/Identity/Account/Login">sign in</a> to create courses.</p>
+    </div>
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
