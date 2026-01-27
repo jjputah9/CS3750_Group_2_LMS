@@ -116,19 +116,25 @@ namespace LMS.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                Response.Redirect("/Dashboard");
+                return;
+            }
+      
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            returnUrl ??= Url.Content("~/Dashboard");
             if (ModelState.IsValid)
             {
                 if (Input.DOB > DateTime.Today)
                 {
                     ModelState.AddModelError("Input.DOB", "Date of birth cannot be in the future.");
+                    return Page();
                 }
 
                 var user = CreateUser();

@@ -1,0 +1,10 @@
+﻿@page
+@model LMS.Pages.Dashboard.DashboardIndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome @Model.CurrentUser?.fName @Model.CurrentUser?.lName!</h1>
+    <h2>Dashboard</h2>
+</div>
