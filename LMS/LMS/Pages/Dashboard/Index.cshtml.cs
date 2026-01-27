@@ -7,18 +7,12 @@ using LMS.models;
 namespace LMS.Pages.Dashboard
 {
     [Authorize]
-    public class DashboardIndexModel : PageModel
+    public class DashboardIndexModel(UserManager<ApplicationUser> userManager) : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-
-        // constructor to inject UserManager
-        public DashboardIndexModel(UserManager<ApplicationUser> userManager)
-        {
-            _userManager = userManager;
-        }
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
 
         // property that holds the current user
-        public ApplicationUser CurrentUser { get; set; }
+        public ApplicationUser? CurrentUser { get; set; }
 
         // Fetch the user on GET request
         public async Task OnGet()
