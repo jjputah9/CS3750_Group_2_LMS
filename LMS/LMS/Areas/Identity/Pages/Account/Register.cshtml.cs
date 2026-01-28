@@ -111,6 +111,10 @@ namespace LMS.Areas.Identity.Pages.Account
             [DataType(DataType.Date)]
             [Display(Name = "Date of birth")]
             public DateTime DOB { get; set; }
+
+            [Required]
+            [Display(Name = "I am a")]
+            public string UserType { get; set; } = string.Empty;
         }
 
 
@@ -136,12 +140,18 @@ namespace LMS.Areas.Identity.Pages.Account
                     ModelState.AddModelError("Input.DOB", "Date of birth cannot be in the future.");
                     return Page();
                 }
+                if (Input.DOB > DateTime.Today.AddYears(-16))
+                {
+                    ModelState.AddModelError("Input.DOB", "Must be at least 16 years old to make an account.");
+                    return Page();
+                }
 
-                var user = CreateUser();
+                    var user = CreateUser();
 
                 user.fName = Input.fName;
                 user.lName = Input.lName;
                 user.DOB = Input.DOB;
+                user.UserType = Input.UserType;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
