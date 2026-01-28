@@ -1,0 +1,21 @@
+﻿@page
+@model LMS.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">@ViewData["Title"]</h1>
+    <p class="lead">Welcome, Student! Here is your profile information:</p>
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+            <p><strong>Name:</strong> John Doe</p>
+            <p><strong>Email:</strong> student@example.com</p>
+            <p><strong>Joined:</strong> January 2026</p>
+            <p><strong>Courses Enrolled:</strong> 3</p>
+        </div>
+    </div>
+
+    <a class="btn btn-primary mt-3" asp-page="/Calendar">View Calendar</a>
+</div>

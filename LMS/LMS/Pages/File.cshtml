@@ -1,0 +1,19 @@
+﻿@page
+@model LMS.Pages.FileModel
+@{
+    ViewData["Title"] = "Files";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">@ViewData["Title"]</h1>
+    <p class="lead">Download course materials and files:</p>
+
+    <ul class="list-group mt-3 shadow-sm">
+        <li class="list-group-item"><a href="#">Syllabus.pdf</a></li>
+        <li class="list-group-item"><a href="#">Lecture1.pptx</a></li>
+        <li class="list-group-item"><a href="#">Assignment1.docx</a></li>
+        <li class="list-group-item"><a href="#">Lecture2.pptx</a></li>
+    </ul>
+
+    <a class="btn btn-primary mt-3" asp-page="/Courses">Go to Courses</a>
+</div>

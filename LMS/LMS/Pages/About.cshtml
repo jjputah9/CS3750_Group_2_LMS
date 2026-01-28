@@ -1,0 +1,26 @@
+﻿@page
+@model LMS.Pages.AboutModel
+@{
+    ViewData["Title"] = "About";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">@ViewData["Title"]</h1>
+    <p class="lead">
+        Welcome to the LMS! This platform helps students access courses, files, and registration easily.
+    </p>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h5>Features:</h5>
+            <ul>
+                <li>View your profile and personal info</li>
+                <li>Check the calendar for events and deadlines</li>
+                <li>Access course materials and files</li>
+                <li>Register for new courses</li>
+            </ul>
+        </div>
+    </div>
+
+    <a class="btn btn-primary mt-3" asp-page="/Courses">Browse Courses</a>
+</div>

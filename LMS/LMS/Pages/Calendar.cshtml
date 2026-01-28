@@ -1,0 +1,35 @@
+﻿@page
+@model LMS.Pages.CalendarModel
+@{
+    ViewData["Title"] = "Calendar";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">@ViewData["Title"]</h1>
+    <p class="lead">Check upcoming events and deadlines:</p>
+
+    <table class="table table-striped mt-3 shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Event</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2026-02-01</td>
+                <td>Course Registration Opens</td>
+            </tr>
+            <tr>
+                <td>2026-02-15</td>
+                <td>First Assignment Due</td>
+            </tr>
+            <tr>
+                <td>2026-03-01</td>
+                <td>Midterm Exams Start</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a class="btn btn-primary mt-3" asp-page="/Courses">View Courses</a>
+</div>
