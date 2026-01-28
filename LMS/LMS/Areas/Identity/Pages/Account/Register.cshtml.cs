@@ -140,8 +140,13 @@ namespace LMS.Areas.Identity.Pages.Account
                     ModelState.AddModelError("Input.DOB", "Date of birth cannot be in the future.");
                     return Page();
                 }
+                if (Input.DOB > DateTime.Today.AddYears(-16))
+                {
+                    ModelState.AddModelError("Input.DOB", "Must be at least 16 years old to make an account.");
+                    return Page();
+                }
 
-                var user = CreateUser();
+                    var user = CreateUser();
 
                 user.fName = Input.fName;
                 user.lName = Input.lName;
