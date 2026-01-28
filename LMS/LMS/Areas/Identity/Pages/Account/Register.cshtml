@@ -1,7 +1,7 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Sign Up";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -44,7 +44,19 @@
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <div class="form-floating mb-3">
+                <label asp-for"Input.UserType"></label>
+                <div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" asp-for="Input.UserType" value="Student" id="radioStudent" checked />
+					<label class="form-check-label" for="radioStudent">Student</label>
+                </div>
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" asp-for="Input.UserType" value="Teacher" id="radioTeacher" />
+					<label class="form-check-label" for="radioTeacher">Teacher</label>
+                </div>
+				<span asp-validation-for="Input.UserType" class="text-danger"></span>
+            </div>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Create Account</button>
         </form>
     </div>
 </div>
