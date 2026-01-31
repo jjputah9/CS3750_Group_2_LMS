@@ -12,5 +12,6 @@ namespace LMS.Data
 
         }
         public DbSet<LMS.Models.Course> Course { get; set; } = default!;
+        public DbSet<LMS.Models.Registration> Registration { get; set; } = default!;
     }
 }

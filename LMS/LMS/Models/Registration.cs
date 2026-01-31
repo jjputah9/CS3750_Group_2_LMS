@@ -13,8 +13,7 @@ public class Registration
     [Required]
     public string? StudentID {get; set;} //foreign key for student table
 
-    [Required]
-    public string? CourseID {get; set; } //foreign key for course table
+    public int CourseID {get; set; } //foreign key for course table
 
     [DataType(DataType.DateTime)]
     public DateTime RegistrationDateTime {get; set;} //date and time of registration
