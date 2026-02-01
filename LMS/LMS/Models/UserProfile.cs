@@ -1,45 +1,64 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LMS.Models
+namespace LMS.models  // Note: lowercase 'models' to match your using statement
 {
     public class UserProfile
     {
+        [Key]
         public int Id { get; set; }
 
-        public string UserId { get; set; }
+        [Required]
+        public string UserId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "First Name is required")]
-        public string FirstName { get; set; }
+        [StringLength(500)]
+        public string? Description { get; set; }
 
-        [Required(ErrorMessage = "Last Name is required")]
-        public string LastName { get; set; }
+        [Required]
+        [StringLength(50)]
+        public string FirstName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Birth Date is required")]
+        [Required]
+        [StringLength(50)]
+        public string LastName { get; set; } = string.Empty;
+
         [DataType(DataType.Date)]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
-        public string AddressLine1 { get; set; }
-        public string AddressLine2 { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Zip { get; set; }
+        [StringLength(100)]
+        public string? AddressLine1 { get; set; }
 
-        [Phone(ErrorMessage = "Invalid phone number")]
-        public string Phone { get; set; }
+        [StringLength(100)]
+        public string? AddressLine2 { get; set; }
 
-        public string Link1 { get; set; }
-        public string Link2 { get; set; }
-        public string Link3 { get; set; }
+        [StringLength(50)]
+        public string? City { get; set; }
 
-        public DateTime CreatedDate { get; set; }
-        public DateTime LastUpdatedDate { get; set; }
+        [StringLength(50)]
+        public string? State { get; set; }
 
-        public UserProfile()
-        {
-            BirthDate = DateTime.Now.AddYears(-18);
-            CreatedDate = DateTime.Now;
-            LastUpdatedDate = DateTime.Now;
-        }
+        [StringLength(10)]
+        public string? ZipCode { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string Phone { get; set; } = string.Empty;
+
+        [StringLength(200)]
+        public string? Link1 { get; set; }
+
+        [StringLength(200)]
+        public string? Link2 { get; set; }
+
+        [StringLength(200)]
+        public string? Link3 { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
+
+        [NotMapped]
+        public string FullName => $"{FirstName} {LastName}";
     }
 }
