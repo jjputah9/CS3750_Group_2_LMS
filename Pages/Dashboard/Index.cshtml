@@ -1,0 +1,62 @@
+﻿@page
+@model LMS.Pages.Dashboard.DashboardIndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome @Model.CurrentUser?.fName @Model.CurrentUser?.lName!</h1>
+    <h2>Dashboard</h2>
+
+    <div class="container my-4">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
+                <div class="card flex-fill d-flex flex-column">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Software Engineering II</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">CS 3750</h6>
+                        <p class="card-text">Noorda Room 324</p>
+                        <p class="card-text">8:30AM - 10:20AM M/W</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
+                <div class="card flex-fill d-flex flex-column">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Formal Languages & Algorithms</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">CS 4100</h6>
+                        <p class="card-text">Noorda Room 324</p>
+                        <p class="card-text">8:30AM - 10:20AM T/T</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
+                <div class="card flex-fill d-flex flex-column">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Advanced Database Programming</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">CS 3550</h6>
+                        <p class="card-text">Noorda Room 234</p>
+                        <p class="card-text">10:30AM - 12:20AM T/T</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
+                <div class="card flex-fill d-flex flex-column">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Operating Systems</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">CS 3100</h6>
+                        <p class="card-text">Noorda Room 328</p>
+                        <p class="card-text">10:30AM - 12:20AM M/W</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    
+</div>

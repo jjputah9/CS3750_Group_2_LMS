@@ -1,0 +1,116 @@
+﻿@page
+@using LMS.models
+@model LMS.Pages.Courses.CreateModel
+@inject SignInManager<ApplicationUser> SignInManager
+
+        @{
+        ViewData["Title"] = "Create";
+        }
+        
+        <h1>Create</h1>
+
+@if (SignInManager.IsSignedIn(User)){
+        
+    <h4>Add Course for @User.Identity?.Name</h4>
+    <hr />
+    <div class="row">
+    <div class="col-md-4">
+    <form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Course.InstructorEmail" value="placeholder"/>
+            <div class="form-group">
+                <span class="text-danger">*</span>
+                <label asp-for="Course.DeptName" class="control-label"></label>
+                <select asp-for="Course.DeptName" class="form-control" aria-required="true">
+                    <option value="CS">CS</option>
+                    <option value="MATH">MATH</option>
+                    <option value="ART">ART</option>
+                    <option value="HIST">HIST</option>
+                    <option value="ENGL">ENGL</option>
+                    <option value="CHEM">CHEM</option>
+                </select>
+                <span asp-validation-for="Course.DeptName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.CourseNum" class="control-label"></label>
+                <input asp-for="Course.CourseNum" class="form-control" />
+                <span asp-validation-for="Course.CourseNum" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <span class="text-danger">*</span>
+                <label asp-for="Course.CourseTitle" class="control-label"></label>
+                <input asp-for="Course.CourseTitle" class="form-control" aria-required="true"/>
+                <span asp-validation-for="Course.CourseTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.CreditHours" class="control-label"></label>
+                <input asp-for="Course.CreditHours" class="form-control" />
+                <span asp-validation-for="Course.CreditHours" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.Capacity" class="control-label"></label>
+                <input asp-for="Course.Capacity" class="form-control" />
+                <span asp-validation-for="Course.Capacity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.Location" class="control-label"></label>
+                <input asp-for="Course.Location" class="form-control" />
+                <span asp-validation-for="Course.Location" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.MeetDays" class="control-label"></label>
+                <ul>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[0]"/>
+                        <label asp-for="Course.MeetDays[0]">Monday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[1]"/>
+                        <label asp-for="Course.MeetDays[1]">Tuesday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[2]"/>
+                        <label asp-for="Course.MeetDays[2]">Wednesday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[3]"/>
+                        <label asp-for="Course.MeetDays[3]">Thursday</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" asp-for="Course.MeetDays[4]" />
+                        <label asp-for="Course.MeetDays[4]">Friday</label>
+                    </li>
+                </ul>
+                <span asp-validation-for="Course.MeetDays" class="text-danger">@Model.MeetDayWarning</span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.StartTime" class="control-label"></label>
+                <input asp-for="Course.StartTime" class="form-control" />
+                <span asp-validation-for="Course.StartTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Course.EndTime" class="control-label"></label>
+                <input asp-for="Course.EndTime" class="form-control" />
+                <span asp-validation-for="Course.EndTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+}
+else{
+    <div class="text-center">
+        <p>Please <a href="/Identity/Account/Login">sign in</a> to create courses.</p>
+    </div>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
