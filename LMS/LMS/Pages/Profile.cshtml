@@ -1,0 +1,341 @@
+﻿@page
+@model LMS.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .profile-header {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid #e1e4e8;
+    }
+
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: bold;
+        margin: 0 auto 20px;
+    }
+
+    .profile-name {
+        text-align: center;
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .profile-title {
+        text-align: center;
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin: 25px 0;
+        padding-top: 25px;
+        border-top: 1px solid #eee;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: #007bff;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .btn-edit {
+        display: block;
+        width: 200px;
+        margin: 20px auto 0;
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+    }
+
+        .btn-edit:hover {
+            background: #0056b3;
+            text-decoration: none;
+            color: white;
+        }
+
+    .profile-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid #e1e4e8;
+    }
+
+    .section-title {
+        font-size: 20px;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 15px;
+        align-items: flex-start;
+    }
+
+    .info-label {
+        width: 140px;
+        font-weight: 500;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .info-value {
+        flex: 1;
+        color: #333;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .description {
+        line-height: 1.6;
+        color: #444;
+        font-size: 15px;
+    }
+
+    .links-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .link-item {
+        display: block;
+        color: #007bff;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #e1e4e8;
+        transition: background 0.2s;
+    }
+
+        .link-item:hover {
+            background: #f8f9fa;
+            text-decoration: underline;
+        }
+
+    .no-data {
+        color: #999;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .alert-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border: 1px solid #c3e6cb;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .profile-stats {
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-row {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-message">
+            ✅ @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!Model.HasProfile)
+    {
+        <div class="profile-section" style="text-align: center;">
+            <h2 style="color: #666; margin-bottom: 20px;">Profile Not Created</h2>
+            <p style="color: #777; margin-bottom: 25px;">You haven't created your profile yet. Get started by adding your information.</p>
+            <a href="/Profile/Edit" class="btn-edit">Create Profile</a>
+        </div>
+    }
+    else
+    {
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-photo">@Model.Initials</div>
+            <h1 class="profile-name">@Model.FullName</h1>
+            <div class="profile-title">Software Developer</div>
+
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-value">@Model.ProfileViews</span>
+                    <span class="stat-label">Profile Views</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">@Model.Connections</span>
+                    <span class="stat-label">Connections</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">@Model.UserProfile?.CreatedAt.ToString("MMM yyyy")</span>
+                    <span class="stat-label">Member Since</span>
+                </div>
+            </div>
+
+            <a href="/Profile/Edit" class="btn-edit">Edit Profile</a>
+        </div>
+
+        <!-- About Section -->
+        <div class="profile-section">
+            <h3 class="section-title">About</h3>
+            @if (!string.IsNullOrEmpty(Model.UserProfile?.Description))
+            {
+                <div class="description">@Model.UserProfile.Description</div>
+            }
+            else
+            {
+                <div class="no-data">No description added yet.</div>
+            }
+        </div>
+
+        <!-- Contact Information -->
+        <div class="profile-section">
+            <h3 class="section-title">Contact Information</h3>
+
+            <div class="info-row">
+                <div class="info-label">Phone:</div>
+                <div class="info-value">@Model.UserProfile?.Phone</div>
+            </div>
+
+            @if (Model.UserProfile?.BirthDate.HasValue == true)
+            {
+                <div class="info-row">
+                    <div class="info-label">Birth Date:</div>
+                    <div class="info-value">@Model.UserProfile.BirthDate.Value.ToString("MMMM dd, yyyy")</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.UserProfile?.AddressLine1))
+            {
+                <div class="info-row">
+                    <div class="info-label">Address:</div>
+                    <div class="info-value">
+                        @Model.UserProfile.AddressLine1
+                        @if (!string.IsNullOrEmpty(Model.UserProfile.AddressLine2))
+                        {
+                            <br />
+                            @Model.UserProfile.AddressLine2
+                        }
+                        @if (!string.IsNullOrEmpty(Model.UserProfile.City))
+                        {
+                            <br />
+                            @Model.UserProfile.City
+                            @if (!string.IsNullOrEmpty(Model.UserProfile.State))
+                            {
+                                @:, @Model.UserProfile.State
+                            }
+                            @if (!string.IsNullOrEmpty(Model.UserProfile.ZipCode))
+                            {
+                                @: @Model.UserProfile.ZipCode
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Links Section -->
+        <div class="profile-section">
+            <h3 class="section-title">Links</h3>
+            <div class="links-list">
+                @if (!string.IsNullOrEmpty(Model.UserProfile?.Link1))
+                {
+                    <a href="@Model.UserProfile.Link1" target="_blank" class="link-item">@Model.UserProfile.Link1</a>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.UserProfile?.Link2))
+                {
+                    <a href="@Model.UserProfile.Link2" target="_blank" class="link-item">@Model.UserProfile.Link2</a>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.UserProfile?.Link3))
+                {
+                    <a href="@Model.UserProfile.Link3" target="_blank" class="link-item">@Model.UserProfile.Link3</a>
+                }
+
+                @if (string.IsNullOrEmpty(Model.UserProfile?.Link1) &&
+                            string.IsNullOrEmpty(Model.UserProfile?.Link2) &&
+                            string.IsNullOrEmpty(Model.UserProfile?.Link3))
+                {
+                    <div class="no-data">No links added yet.</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    // Simple interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Profile page loaded');
+
+        // Add click tracking for analytics (demo)
+        document.querySelectorAll('.link-item').forEach(link => {
+            link.addEventListener('click', function() {
+                console.log('Link clicked:', this.href);
+            });
+        });
+    });
+</script>

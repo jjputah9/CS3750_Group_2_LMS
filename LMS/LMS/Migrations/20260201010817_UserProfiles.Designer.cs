@@ -4,6 +4,7 @@ using LMS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260201010817_UserProfiles")]
+    partial class UserProfiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,29 +75,6 @@ namespace LMS.Migrations
                     b.ToTable("Course");
                 });
 
-            modelBuilder.Entity("LMS.Models.Registration", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CourseID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RegistrationDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("StudentID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Registration");
-                });
-
             modelBuilder.Entity("LMS.models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -149,6 +129,10 @@ namespace LMS.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("fName")
                         .IsRequired()
@@ -227,24 +211,6 @@ namespace LMS.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ProfilePictureContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProfilePictureData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ProfilePictureFileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("ProfilePictureUploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("State")
                         .HasMaxLength(50)
