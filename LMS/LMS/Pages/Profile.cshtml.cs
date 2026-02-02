@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using LMS.Data;
-using LMS.models;
+using LMS.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
