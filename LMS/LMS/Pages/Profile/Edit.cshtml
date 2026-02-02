@@ -81,7 +81,7 @@
         border-radius: 8px;
     }
 
-    .profile-photo {
+    .profile-photo-preview {
         width: 120px;
         height: 120px;
         border-radius: 50%;
@@ -92,7 +92,15 @@
         color: #6c757d;
         font-size: 40px;
         flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
     }
+
+        .profile-photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
     .photo-info {
         flex: 1;
@@ -105,14 +113,36 @@
         }
 
     .btn-upload {
-        background: #6c757d;
+        background: #0a66c2;
         color: white;
         border: none;
         padding: 8px 16px;
         border-radius: 4px;
         font-size: 13px;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
+
+        .btn-upload:hover {
+            background: #004182;
+        }
+
+    .remove-photo {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+        .remove-photo:hover {
+            background: #c82333;
+        }
 
     .section-title {
         font-size: 18px;
@@ -166,6 +196,15 @@
         border: 1px solid #c3e6cb;
     }
 
+    .alert-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border: 1px solid #bee5eb;
+    }
+
     .text-danger {
         color: #dc3545;
         font-size: 12px;
@@ -177,6 +216,39 @@
         content: " *";
         color: #dc3545;
     }
+
+    .file-input {
+        display: none;
+    }
+
+    .upload-status {
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .upload-progress {
+        width: 100%;
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        margin-top: 5px;
+        overflow: hidden;
+        display: none;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: #0a66c2;
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    .photo-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
 </style>
 
 <div class="edit-container">
@@ -186,25 +258,68 @@
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert-success">
-                @TempData["SuccessMessage"]
+                <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
             </div>
         }
 
-        <form method="post">
+        @if (TempData["ImageMessage"] != null)
+        {
+            <div class="alert-info">
+                <i class="fas fa-info-circle"></i> @TempData["ImageMessage"]
+            </div>
+        }
+
+        <form method="post" enctype="multipart/form-data">
             <!-- Profile Photo Section -->
             <div class="photo-section">
-                <div class="profile-photo">
-                    <i class="fas fa-user"></i>
+                <div class="profile-photo-preview" id="photoPreview">
+                    @if (!string.IsNullOrEmpty(Model.CurrentProfileImageUrl))
+                    {
+                        <img src="@Model.CurrentProfileImageUrl" alt="Profile Photo"
+                             id="profileImage"
+                             onerror="document.getElementById('initialsDisplay').style.display='flex'; this.style.display='none';">
+                        <div id="initialsDisplay" style="display: none; font-size: 40px; color: #6c757d;">
+                            @Model.Input.FirstName?[0]@Model.Input.LastName?[0]
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="initialsDisplay" style="font-size: 40px; color: #6c757d;">
+                            @Model.Input.FirstName?[0]@Model.Input.LastName?[0]
+                        </div>
+                        <img id="profileImage" style="display: none;">
+                    }
                 </div>
                 <div class="photo-info">
                     <p><strong>Profile Photo</strong></p>
                     <p>Upload a clear photo of yourself. This will be displayed on your profile.</p>
-                    <button type="button" class="btn-upload">
-                        <i class="fas fa-upload"></i> Upload Photo
-                    </button>
+
+                    <div class="photo-actions">
+                        <button type="button" class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-upload"></i> Upload Photo
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(Model.CurrentProfileImageUrl))
+                        {
+                            <button type="button" class="remove-photo" onclick="removePhoto()">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        }
+                    </div>
+
+                    <input type="file" id="fileInput" name="ProfilePicture"
+                           accept=".jpg,.jpeg,.png,.gif" class="file-input"
+                           onchange="previewImage(this)">
+
+                    <div class="upload-status" id="uploadStatus"></div>
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+
                     <p style="font-size: 12px; color: #888; margin-top: 8px;">
-                        Max file size: 5MB. Supported formats: JPG, PNG
+                        Max file size: 5MB. Supported formats: JPG, PNG, GIF
                     </p>
+                    <span asp-validation-for="ProfilePicture" class="text-danger"></span>
                 </div>
             </div>
 
@@ -321,32 +436,160 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // Photo upload simulation (static for now)
-        document.querySelector('.btn-upload').addEventListener('click', function() {
-            alert('Photo upload feature will be implemented in the next version. For now, the photo area is static.');
-        });
+        // Function to preview selected image
+        function previewImage(input) {
+            const file = input.files[0];
+            if (!file) return;
 
-        // Character counter for description
-        const descTextarea = document.querySelector('#Input_Description');
-        const charCounter = document.createElement('div');
-        charCounter.style.fontSize = '12px';
-        charCounter.style.color = '#666';
-        charCounter.style.textAlign = 'right';
-        charCounter.style.marginTop = '4px';
-        descTextarea.parentNode.appendChild(charCounter);
+            // Validate file
+            if (!validateFile(file)) {
+                input.value = '';
+                return;
+            }
 
-        function updateCharCount() {
-            const current = descTextarea.value.length;
-            const max = 500;
-            charCounter.textContent = `${current} / ${max} characters`;
-            if (current > max) {
-                charCounter.style.color = '#dc3545';
+            // Show progress
+            showUploadStatus('Uploading...', true);
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const profileImage = document.getElementById('profileImage');
+                const initialsDisplay = document.getElementById('initialsDisplay');
+
+                if (profileImage) {
+                    profileImage.src = e.target.result;
+                    profileImage.style.display = 'block';
+                    if (initialsDisplay) {
+                        initialsDisplay.style.display = 'none';
+                    }
+                }
+
+                // Show success status
+                showUploadStatus('Ready to save! File: ' + file.name, false);
+
+                // Simulate upload progress
+                simulateUploadProgress();
+            };
+
+            reader.onerror = function() {
+                showUploadStatus('Error reading file', false);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Function to remove photo
+        function removePhoto() {
+            const profileImage = document.getElementById('profileImage');
+            const initialsDisplay = document.getElementById('initialsDisplay');
+            const fileInput = document.getElementById('fileInput');
+
+            if (profileImage) {
+                profileImage.style.display = 'none';
+                profileImage.src = '';
+            }
+
+            if (initialsDisplay) {
+                initialsDisplay.style.display = 'flex';
+            }
+
+            if (fileInput) {
+                fileInput.value = '';
+            }
+
+            // Add a hidden field to indicate photo removal
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'RemovePhoto';
+            hiddenInput.value = 'true';
+            document.querySelector('form').appendChild(hiddenInput);
+
+            showUploadStatus('Photo will be removed when you save', false);
+        }
+
+        // Function to validate file
+        function validateFile(file) {
+            // Check file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                return false;
+            }
+
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Only JPG, PNG, and GIF files are allowed.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Function to show upload status
+        function showUploadStatus(message, showProgress) {
+            const statusDiv = document.getElementById('uploadStatus');
+            const progressDiv = document.getElementById('uploadProgress');
+
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+
+            if (showProgress) {
+                progressDiv.style.display = 'block';
             } else {
-                charCounter.style.color = '#666';
+                progressDiv.style.display = 'none';
             }
         }
 
-        descTextarea.addEventListener('input', updateCharCount);
-        updateCharCount(); // Initial count
+        // Function to simulate upload progress
+        function simulateUploadProgress() {
+            const progressBar = document.getElementById('progressBar');
+            let width = 0;
+
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width += 10;
+                    progressBar.style.width = width + '%';
+                }
+            }, 100);
+        }
+
+        // Character counter for description
+        const descTextarea = document.querySelector('#Input_Description');
+        if (descTextarea) {
+            const charCounter = document.createElement('div');
+            charCounter.style.fontSize = '12px';
+            charCounter.style.color = '#666';
+            charCounter.style.textAlign = 'right';
+            charCounter.style.marginTop = '4px';
+            descTextarea.parentNode.appendChild(charCounter);
+
+            function updateCharCount() {
+                const current = descTextarea.value.length;
+                const max = 500;
+                charCounter.textContent = `${current} / ${max} characters`;
+                if (current > max) {
+                    charCounter.style.color = '#dc3545';
+                } else {
+                    charCounter.style.color = '#666';
+                }
+            }
+
+            descTextarea.addEventListener('input', updateCharCount);
+            updateCharCount(); // Initial count
+        }
+
+        // Image error handling
+        const profileImage = document.getElementById('profileImage');
+        if (profileImage) {
+            profileImage.addEventListener('error', function() {
+                this.style.display = 'none';
+                const initialsDisplay = document.getElementById('initialsDisplay');
+                if (initialsDisplay) {
+                    initialsDisplay.style.display = 'flex';
+                }
+            });
+        }
     </script>
 }
