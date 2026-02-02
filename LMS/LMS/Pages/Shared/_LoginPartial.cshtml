@@ -6,25 +6,22 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-page="/About">About</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-page="/Profile">Profile</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-page="/Calendar">Calendar</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-page="/File">File</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-page="/Registrations/Create">Registration</a>
-        </li>
-
     <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
+        <a class="nav-link text-dark" asp-page="/About">About</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-page="/Profile">Profile</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-page="/Calendar">Calendar</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-page="/File">File</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-page="/Registrations/Create">Registration</a>
+    </li>
+
     <li class="nav-item">
         <a  class="nav-link text-dark" href="/Courses" title="Courses">Courses</a>
     </li>

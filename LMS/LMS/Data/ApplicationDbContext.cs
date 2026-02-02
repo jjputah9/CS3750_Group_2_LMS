@@ -14,6 +14,9 @@ namespace LMS.Data
         // Existing DbSet
         public DbSet<LMS.Models.Course> Course { get; set; } = default!;
 
+        // Registration DbSet
+        public DbSet<Registration> Registration { get; set; } = default!;
+
         // Add UserProfiles DbSet - make sure it matches your namespace
         public DbSet<UserProfile> UserProfiles { get; set; } = default!;
 
