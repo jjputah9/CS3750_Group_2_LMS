@@ -5,6 +5,8 @@ using LMS.Data;
 using LMS.models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace LMS.Pages.Profile
 {
@@ -12,63 +14,26 @@ namespace LMS.Pages.Profile
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<EditModel> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public EditModel(ApplicationDbContext context, ILogger<EditModel> logger)
+        public EditModel(ApplicationDbContext context, ILogger<EditModel> logger, IWebHostEnvironment environment)
         {
             _context = context;
             _logger = logger;
+            _environment = environment;
         }
 
         [BindProperty]
         public ProfileInputModel Input { get; set; } = new ProfileInputModel();
 
+        [BindProperty]
+        public IFormFile? ProfilePicture { get; set; }
+
+        public string? CurrentProfileImageUrl { get; set; }
+
         public async Task<IActionResult> OnGetAsync()
         {
-            try
-            {
-                // Get current user ID (you'll need authentication for this)
-                // For now, using a demo user ID
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "demo-user-123";
-
-                // Try to load existing profile from database
-                var existingProfile = await _context.UserProfiles
-                    .FirstOrDefaultAsync(p => p.UserId == userId);
-
-                if (existingProfile != null)
-                {
-                    // Populate form with existing data
-                    Input.FirstName = existingProfile.FirstName;
-                    Input.LastName = existingProfile.LastName;
-                    Input.Description = existingProfile.Description;
-                    Input.BirthDate = existingProfile.BirthDate;
-                    Input.AddressLine1 = existingProfile.AddressLine1;
-                    Input.AddressLine2 = existingProfile.AddressLine2;
-                    Input.City = existingProfile.City;
-                    Input.State = existingProfile.State;
-                    Input.ZipCode = existingProfile.ZipCode;
-                    Input.Phone = existingProfile.Phone;
-                    Input.Link1 = existingProfile.Link1;
-                    Input.Link2 = existingProfile.Link2;
-                    Input.Link3 = existingProfile.Link3;
-                }
-                else
-                {
-                    // Demo data for new users
-                    Input.FirstName = "John";
-                    Input.LastName = "Doe";
-                    Input.Description = "Passionate software developer with experience in building web applications using ASP.NET, C#, and SQL Server.";
-                    Input.Phone = "(801) 555-1234";
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading profile data");
-                // Fall back to demo data
-                Input.FirstName = "John";
-                Input.LastName = "Doe";
-                Input.Phone = "(801) 555-1234";
-            }
-
+            await LoadProfileData();
             return Page();
         }
 
@@ -76,78 +41,235 @@ namespace LMS.Pages.Profile
         {
             if (!ModelState.IsValid)
             {
+                await LoadCurrentImage();
                 return Page();
             }
 
             try
             {
-                // Get current user ID (use authentication when available)
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "demo-user-123";
-
-                // Check if profile exists
+                var userId = GetUserId();
                 var existingProfile = await _context.UserProfiles
                     .FirstOrDefaultAsync(p => p.UserId == userId);
 
-                if (existingProfile == null)
+                // Handle profile picture upload
+                if (ProfilePicture != null && ProfilePicture.Length > 0)
                 {
-                    // Create new profile
-                    var newProfile = new UserProfile
+                    var uploadResult = await SaveProfilePicture(ProfilePicture, userId);
+                    if (!uploadResult.success)
                     {
-                        UserId = userId,
-                        FirstName = Input.FirstName,
-                        LastName = Input.LastName,
-                        Description = Input.Description,
-                        BirthDate = Input.BirthDate,
-                        AddressLine1 = Input.AddressLine1,
-                        AddressLine2 = Input.AddressLine2,
-                        City = Input.City,
-                        State = Input.State,
-                        ZipCode = Input.ZipCode,
-                        Phone = Input.Phone,
-                        Link1 = Input.Link1,
-                        Link2 = Input.Link2,
-                        Link3 = Input.Link3,
-                        CreatedAt = DateTime.UtcNow
-                    };
+                        ModelState.AddModelError("ProfilePicture", uploadResult.message);
+                        await LoadCurrentImage();
+                        return Page();
+                    }
 
-                    _context.UserProfiles.Add(newProfile);
-                }
-                else
-                {
-                    // Update existing profile
-                    existingProfile.FirstName = Input.FirstName;
-                    existingProfile.LastName = Input.LastName;
-                    existingProfile.Description = Input.Description;
-                    existingProfile.BirthDate = Input.BirthDate;
-                    existingProfile.AddressLine1 = Input.AddressLine1;
-                    existingProfile.AddressLine2 = Input.AddressLine2;
-                    existingProfile.City = Input.City;
-                    existingProfile.State = Input.State;
-                    existingProfile.ZipCode = Input.ZipCode;
-                    existingProfile.Phone = Input.Phone;
-                    existingProfile.Link1 = Input.Link1;
-                    existingProfile.Link2 = Input.Link2;
-                    existingProfile.Link3 = Input.Link3;
-                    existingProfile.UpdatedAt = DateTime.UtcNow;
-
-                    _context.UserProfiles.Update(existingProfile);
+                    // Update profile with picture data
+                    await UpdateProfileWithPicture(existingProfile, userId, uploadResult);
+                    TempData["ImageMessage"] = "Profile picture updated!";
                 }
 
-                await _context.SaveChangesAsync();
+                // Update or create profile
+                await SaveProfile(existingProfile, userId);
 
-                TempData["SuccessMessage"] = "Profile saved successfully to database!";
+                TempData["SuccessMessage"] = "Profile saved successfully!";
                 return RedirectToPage("/Profile");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving profile to database");
+                _logger.LogError(ex, "Error saving profile");
                 ModelState.AddModelError("", "Error saving profile. Please try again.");
+                await LoadCurrentImage();
                 return Page();
+            }
+        }
+
+        private string GetUserId()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "demo-user-123";
+        }
+
+        private async Task LoadProfileData()
+        {
+            var userId = GetUserId();
+            var existingProfile = await _context.UserProfiles
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (existingProfile != null)
+            {
+                Input.FirstName = existingProfile.FirstName;
+                Input.LastName = existingProfile.LastName;
+                Input.Description = existingProfile.Description;
+                Input.BirthDate = existingProfile.BirthDate;
+                Input.AddressLine1 = existingProfile.AddressLine1;
+                Input.AddressLine2 = existingProfile.AddressLine2;
+                Input.City = existingProfile.City;
+                Input.State = existingProfile.State;
+                Input.ZipCode = existingProfile.ZipCode;
+                Input.Phone = existingProfile.Phone;
+                Input.Link1 = existingProfile.Link1;
+                Input.Link2 = existingProfile.Link2;
+                Input.Link3 = existingProfile.Link3;
+
+                if (!string.IsNullOrEmpty(existingProfile.ProfilePictureUrl))
+                {
+                    CurrentProfileImageUrl = existingProfile.ProfilePictureUrl;
+                }
+                else if (!string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
+                {
+                    CurrentProfileImageUrl = $"/uploads/{existingProfile.ProfilePictureFileName}";
+                }
+            }
+            else
+            {
+                Input.FirstName = "John";
+                Input.LastName = "Doe";
+                Input.Phone = "(801) 555-1234";
+            }
+        }
+
+        private async Task<(bool success, string message, string url, string fileName, byte[] data, string contentType)>
+            SaveProfilePicture(IFormFile file, string userId)
+        {
+            try
+            {
+                // Validate
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var extension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(extension))
+                    return (false, "Only JPG, PNG, GIF files allowed.", null, null, null, null);
+
+                if (file.Length > 5 * 1024 * 1024)
+                    return (false, "File must be less than 5MB.", null, null, null, null);
+
+                // Create folder
+                var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsPath))
+                    Directory.CreateDirectory(uploadsPath);
+
+                // Generate filename
+                var fileName = $"{userId}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                // Save file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Read data
+                byte[] imageData;
+                using (var ms = new MemoryStream())
+                {
+                    await file.CopyToAsync(ms);
+                    imageData = ms.ToArray();
+                }
+
+                return (true, "Success", $"/uploads/{fileName}", fileName, imageData, file.ContentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Upload error");
+                return (false, $"Error: {ex.Message}", null, null, null, null);
+            }
+        }
+
+        private async Task UpdateProfileWithPicture(UserProfile? profile, string userId,
+            (bool success, string message, string url, string fileName, byte[] data, string contentType) uploadResult)
+        {
+            if (profile == null)
+            {
+                profile = new UserProfile
+                {
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.UserProfiles.Add(profile);
+            }
+
+            profile.ProfilePictureUrl = uploadResult.url;
+            profile.ProfilePictureFileName = uploadResult.fileName;
+            profile.ProfilePictureData = uploadResult.data;
+            profile.ProfilePictureContentType = uploadResult.contentType;
+            profile.ProfilePictureUploadedAt = DateTime.UtcNow;
+            profile.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task SaveProfile(UserProfile? existingProfile, string userId)
+        {
+            if (existingProfile == null)
+            {
+                var newProfile = new UserProfile
+                {
+                    UserId = userId,
+                    FirstName = Input.FirstName,
+                    LastName = Input.LastName,
+                    Description = Input.Description,
+                    BirthDate = Input.BirthDate,
+                    AddressLine1 = Input.AddressLine1,
+                    AddressLine2 = Input.AddressLine2,
+                    City = Input.City,
+                    State = Input.State,
+                    ZipCode = Input.ZipCode,
+                    Phone = Input.Phone,
+                    Link1 = Input.Link1,
+                    Link2 = Input.Link2,
+                    Link3 = Input.Link3,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.UserProfiles.Add(newProfile);
+            }
+            else
+            {
+                existingProfile.FirstName = Input.FirstName;
+                existingProfile.LastName = Input.LastName;
+                existingProfile.Description = Input.Description;
+                existingProfile.BirthDate = Input.BirthDate;
+                existingProfile.AddressLine1 = Input.AddressLine1;
+                existingProfile.AddressLine2 = Input.AddressLine2;
+                existingProfile.City = Input.City;
+                existingProfile.State = Input.State;
+                existingProfile.ZipCode = Input.ZipCode;
+                existingProfile.Phone = Input.Phone;
+                existingProfile.Link1 = Input.Link1;
+                existingProfile.Link2 = Input.Link2;
+                existingProfile.Link3 = Input.Link3;
+                existingProfile.UpdatedAt = DateTime.UtcNow;
+
+                _context.UserProfiles.Update(existingProfile);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task LoadCurrentImage()
+        {
+            try
+            {
+                var userId = GetUserId();
+                var existingProfile = await _context.UserProfiles
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
+
+                if (existingProfile != null)
+                {
+                    if (!string.IsNullOrEmpty(existingProfile.ProfilePictureUrl))
+                    {
+                        CurrentProfileImageUrl = existingProfile.ProfilePictureUrl;
+                    }
+                    else if (!string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
+                    {
+                        CurrentProfileImageUrl = $"/uploads/{existingProfile.ProfilePictureFileName}";
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore error
             }
         }
     }
 
-    // Keep the same ProfileInputModel class
     public class ProfileInputModel
     {
         [Required(ErrorMessage = "Description is required")]

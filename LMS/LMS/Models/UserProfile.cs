@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LMS.models  // Note: lowercase 'models' to match your using statement
+namespace LMS.models
 {
     public class UserProfile
     {
@@ -54,11 +54,32 @@ namespace LMS.models  // Note: lowercase 'models' to match your using statement
         [StringLength(200)]
         public string? Link3 { get; set; }
 
+        // ========== ADD THESE PROFILE PICTURE PROPERTIES ==========
+        [StringLength(500)]
+        public string? ProfilePictureUrl { get; set; }
+
+        public byte[]? ProfilePictureData { get; set; }
+
+        [StringLength(100)]
+        public string? ProfilePictureContentType { get; set; }
+
+        [StringLength(255)]
+        public string? ProfilePictureFileName { get; set; }
+
+        public DateTime? ProfilePictureUploadedAt { get; set; }
+        // ========== END OF PROFILE PICTURE PROPERTIES ==========
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
+
+        [NotMapped]
+        public string Initials =>
+            !string.IsNullOrEmpty(FirstName) && !string.IsNullOrEmpty(LastName)
+                ? $"{FirstName[0]}{LastName[0]}".ToUpper()
+                : "??";
     }
 }
