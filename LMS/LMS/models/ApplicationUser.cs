@@ -11,7 +11,5 @@ namespace LMS.models
         public string? lName { get; set; }
         [Required]
         public DateTime DOB { get; set; }
-        [Required]
-        public string? UserType { get; set; }
     }
 }

@@ -1,0 +1,25 @@
+﻿@page
+@model computervision.aspcore.Pages.IndexModel
+@{
+    ViewData["Title"] = "FileUpload";
+}
+
+<div class="text-center">
+    <h4>File Upload Test</h4>
+</div>
+<form enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label class="file">
+            <input type="file" asp-for="fileUpload.FormFile" aria-label="File browser example">
+            <span class="file-custom"></span>
+        </label>
+        <input asp-page-handler="Upload" class="btn btn-primary" type="submit" value="Upload">
+    </div>
+
+    @{
+        if (ViewData["SuccessMessage"] != null)
+        {
+            <span class="badge badge-success"> @ViewData["SuccessMessage"]</span>
+        }
+    }
+</form>
