@@ -1,0 +1,113 @@
+﻿@page
+@model LMS.Pages.Registrations.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+@if (@Model.CurrentUser == null)
+{
+    <div class="text-center">
+    <p>Please Log in to view registration. <br><a href="/Identity/Account/Login">Course List (Instructors)</a></p>
+    </div>
+}
+else if (@Model.CurrentUser.UserType != "Student")
+{
+    <div class="text-center">
+    <p>The Registration Page is used by students. <br><a href="/Courses">Course List (Instructors)</a></p>
+    </div>
+}
+else
+{
+    
+<h1>Register</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].InstructorEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].DeptName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].CourseNum)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].CourseTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].CreditHours)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].Capacity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].MeetDays)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courses[0].EndTime)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Courses) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.InstructorEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DeptName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CourseNum)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CourseTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreditHours)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Capacity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetDays)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StartTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EndTime)
+            </td>
+            <td>
+                <form method="post">
+                    <input type="hidden" asp-for="Registration.CourseID" value=@item.Id/>
+                    <input type="hidden" asp-for="Registration.StudentID" value=@Model.CurrentUser.Id/>
+                    @if (@Model.CheckRegistration(@Model.CurrentUser.Id, @item.Id))
+                    {
+                        <input type="submit" value="Drop Course" class="btn btn-primary" />
+                    }
+                    else
+                    {
+                        <input type="submit" value="Add Course" class="btn btn-primary" />
+                    }
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+}
