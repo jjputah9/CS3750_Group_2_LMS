@@ -28,36 +28,49 @@ namespace LMS.Pages
         {
             try
             {
-                // Get current user ID - use test user for now
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "test-user-001";
+                // Get current user ID
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 // Load profile from database
                 UserProfile = await _context.UserProfiles
                     .FirstOrDefaultAsync(p => p.UserId == userId);
 
+                if (UserProfile == null)
+                {
+                    // Profile does not exist (new user), create one
+                    var user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Id == userId);
+
+                    if (user != null)
+                    {
+                        UserProfile = new UserProfile
+                        {
+                            UserId = user.Id,
+                            FirstName = user.fName,
+                            LastName = user.lName,
+                            BirthDate = user.DOB,
+                            CreatedAt = DateTime.UtcNow,
+                        };
+                        _context.UserProfiles.Add(UserProfile);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 if (UserProfile != null)
                 {
-                    FullName = $"{UserProfile.FirstName} {UserProfile.LastName}";
-                    Initials = GetInitials(UserProfile.FirstName, UserProfile.LastName);
+                    FullName = UserProfile.FullName;
+                    Initials = UserProfile.Initials;
                     HasProfile = true;
-
-                    // Demo stats (in real app, these would come from database)
-                    ProfileViews = new Random().Next(100, 1000);
-                    Connections = new Random().Next(10, 500);
-
-                    // Demo skills
-                    Skills = GetDemoSkills();
-                }
-                else
+                } else
                 {
-                    FullName = "Guest User";
+                    FullName = "John Doe";
                     Initials = "GU";
                     TempData["InfoMessage"] = "Complete your profile to get started!";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Fallback to demo data
+                Console.WriteLine($"Error loading profile: {ex.Message}");
                 FullName = "John Doe";
                 Initials = "JD";
             }
