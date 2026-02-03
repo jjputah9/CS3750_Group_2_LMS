@@ -2,89 +2,70 @@
 @model LMS.Pages.Courses.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Courses";
 }
 
-<h1>Index</h1>
+<h1 class="mb-4">Courses</h1>
 
 <p>
-    <a asp-page="Create">Create New</a>
+    <a asp-page="Create" class="btn btn-primary mb-3">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].InstructorEmail)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].DeptName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].CourseNum)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].CourseTitle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].CreditHours)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].Capacity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].Location)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].MeetDays)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].StartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course[0].EndTime)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Course) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.InstructorEmail)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeptName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseNum)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreditHours)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Capacity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MeetDays)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<div class="row">
+    @foreach (var item in Model.Course)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        @item.DeptName @item.CourseNum – @item.CourseTitle
+                    </h5>
+
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Instructor: @item.InstructorEmail
+                    </h6>
+
+                    <p class="card-text mb-1">
+                        <strong>Credits:</strong> @item.CreditHours
+                    </p>
+
+                    <p class="card-text mb-1">
+                        <strong>Capacity:</strong> @item.Capacity
+                    </p>
+
+                    <p class="card-text mb-1">
+                        <strong>Location:</strong> @item.Location
+                    </p>
+
+                    <p class="card-text mb-1">
+                        <strong>Meeting Days:</strong>
+                        @{
+                            var days = new List<string>();
+                            if (item.MeetDays != null)
+                            {
+                                if (item.MeetDays[0]) days.Add("Mon");
+                                if (item.MeetDays[1]) days.Add("Tue");
+                                if (item.MeetDays[2]) days.Add("Wed");
+                                if (item.MeetDays[3]) days.Add("Thu");
+                                if (item.MeetDays[4]) days.Add("Fri");
+                            }
+                        }
+                        @string.Join(", ", days)
+                    </p>
+
+                    <p class="card-text mb-3">
+                        <strong>Time:</strong>
+                        @item.StartTime.ToShortTimeString() –
+                        @item.EndTime.ToShortTimeString()
+                    </p>
+
+                    <div>
+                        <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-page="./Delete" asp-route-id="@item.Id" class="text-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

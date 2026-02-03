@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using LMS.models;
+using LMS.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -30,13 +30,15 @@ namespace LMS.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +46,7 @@ namespace LMS.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -111,6 +114,9 @@ namespace LMS.Areas.Identity.Pages.Account
             [DataType(DataType.Date)]
             [Display(Name = "Date of birth")]
             public DateTime DOB { get; set; }
+
+            [Required]
+            public string UserType { get; set; } = string.Empty;
         }
 
 
@@ -136,13 +142,19 @@ namespace LMS.Areas.Identity.Pages.Account
                     ModelState.AddModelError("Input.DOB", "Date of birth cannot be in the future.");
                     return Page();
                 }
+                if (Input.DOB > DateTime.Today.AddYears(-16))
+                {
+                    ModelState.AddModelError("Input.DOB", "Must be at least 16 years old to make an account.");
+                    return Page();
+                }
 
-                var user = CreateUser();
+                    var user = CreateUser();
 
                 user.fName = Input.fName;
                 user.lName = Input.lName;
                 user.DOB = Input.DOB;
-
+                user.UserType = Input.UserType;
+                
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -150,6 +162,8 @@ namespace LMS.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    await _userManager.AddToRoleAsync(user, Input.UserType);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
