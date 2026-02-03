@@ -203,139 +203,110 @@
         </div>
     }
 
-    @if (!Model.HasProfile)
-    {
-        <div class="profile-section" style="text-align: center;">
-            <h2 style="color: #666; margin-bottom: 20px;">Profile Not Created</h2>
-            <p style="color: #777; margin-bottom: 25px;">You haven't created your profile yet. Get started by adding your information.</p>
-            <a href="/Profile/Edit" class="btn-edit">Create Profile</a>
-        </div>
-    }
-    else
-    {
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-photo">@Model.Initials</div>
-            <h1 class="profile-name">@Model.FullName</h1>
-            <div class="profile-title">Software Developer</div>
-
-            <div class="profile-stats">
-                <div class="stat-item">
-                    <span class="stat-value">@Model.ProfileViews</span>
-                    <span class="stat-label">Profile Views</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">@Model.Connections</span>
-                    <span class="stat-label">Connections</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">@Model.UserProfile?.CreatedAt.ToString("MMM yyyy")</span>
-                    <span class="stat-label">Member Since</span>
-                </div>
-            </div>
-
-            <a href="/Profile/Edit" class="btn-edit">Edit Profile</a>
-        </div>
-
-        <!-- About Section -->
-        <div class="profile-section">
-            <h3 class="section-title">About</h3>
-            @if (!string.IsNullOrEmpty(Model.UserProfile?.Description))
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-photo">
+            @if (!string.IsNullOrEmpty(Model.UserProfile?.ProfilePictureUrl))
             {
-                <div class="description">@Model.UserProfile.Description</div>
+                <img src="@Model.UserProfile.ProfilePictureUrl" 
+                    alt="Profile Photo" 
+                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
             }
             else
             {
-                <div class="no-data">No description added yet.</div>
+                @Model.Initials
             }
         </div>
+        <h1 class="profile-name">@Model.FullName</h1>
 
-        <!-- Contact Information -->
-        <div class="profile-section">
-            <h3 class="section-title">Contact Information</h3>
+        <a href="/Profile/Edit" class="btn-edit">Edit Profile</a>
+    </div>
 
+    <!-- About Section -->
+    <div class="profile-section">
+        <h3 class="section-title">About</h3>
+        @if (!string.IsNullOrEmpty(Model.UserProfile?.Description))
+        {
+            <div class="description">@Model.UserProfile.Description</div>
+        }
+        else
+        {
+            <div class="no-data">No description added yet.</div>
+        }
+    </div>
+
+    <!-- Contact Information -->
+    <div class="profile-section">
+        <h3 class="section-title">Contact Information</h3>
+
+        <div class="info-row">
+            <div class="info-label">Phone:</div>
+            <div class="info-value">@Model.UserProfile?.Phone</div>
+        </div>
+
+
+        <div class="info-row">
+            <div class="info-label">Birth Date:</div>
+            <div class="info-value">@Model.UserProfile.BirthDate.ToString("MMMM dd, yyyy")</div>
+        </div>
+     
+
+        @if (!string.IsNullOrEmpty(Model.UserProfile?.AddressLine1))
+        {
             <div class="info-row">
-                <div class="info-label">Phone:</div>
-                <div class="info-value">@Model.UserProfile?.Phone</div>
-            </div>
-
-            @if (Model.UserProfile?.BirthDate.HasValue == true)
-            {
-                <div class="info-row">
-                    <div class="info-label">Birth Date:</div>
-                    <div class="info-value">@Model.UserProfile.BirthDate.Value.ToString("MMMM dd, yyyy")</div>
+                <div class="info-label">Address:</div>
+                <div class="info-value">
+                    @Model.UserProfile.AddressLine1
+                    @if (!string.IsNullOrEmpty(Model.UserProfile.AddressLine2))
+                    {
+                        <br />
+                        @Model.UserProfile.AddressLine2
+                    }
+                    @if (!string.IsNullOrEmpty(Model.UserProfile.City))
+                    {
+                        <br />
+                        @Model.UserProfile.City
+                        @if (!string.IsNullOrEmpty(Model.UserProfile.State))
+                        {
+                            @:, @Model.UserProfile.State
+                        }
+                        @if (!string.IsNullOrEmpty(Model.UserProfile.ZipCode))
+                        {
+                            @: @Model.UserProfile.ZipCode
+                        }
+                    }
                 </div>
+            </div>
+        }
+    </div>
+
+    <!-- Links Section -->
+    <div class="profile-section">
+        <h3 class="section-title">Links</h3>
+        <div class="links-list">
+            @if (!string.IsNullOrEmpty(Model.UserProfile?.Link1))
+            {
+                <a href="@Model.UserProfile.Link1" target="_blank" class="link-item">@Model.UserProfile.Link1</a>
             }
 
-            @if (!string.IsNullOrEmpty(Model.UserProfile?.AddressLine1))
+            @if (!string.IsNullOrEmpty(Model.UserProfile?.Link2))
             {
-                <div class="info-row">
-                    <div class="info-label">Address:</div>
-                    <div class="info-value">
-                        @Model.UserProfile.AddressLine1
-                        @if (!string.IsNullOrEmpty(Model.UserProfile.AddressLine2))
-                        {
-                            <br />
-                            @Model.UserProfile.AddressLine2
-                        }
-                        @if (!string.IsNullOrEmpty(Model.UserProfile.City))
-                        {
-                            <br />
-                            @Model.UserProfile.City
-                            @if (!string.IsNullOrEmpty(Model.UserProfile.State))
-                            {
-                                @:, @Model.UserProfile.State
-                            }
-                            @if (!string.IsNullOrEmpty(Model.UserProfile.ZipCode))
-                            {
-                                @: @Model.UserProfile.ZipCode
-                            }
-                        }
-                    </div>
-                </div>
+                <a href="@Model.UserProfile.Link2" target="_blank" class="link-item">@Model.UserProfile.Link2</a>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.UserProfile?.Link3))
+            {
+                <a href="@Model.UserProfile.Link3" target="_blank" class="link-item">@Model.UserProfile.Link3</a>
+            }
+
+            @if (string.IsNullOrEmpty(Model.UserProfile?.Link1) &&
+                        string.IsNullOrEmpty(Model.UserProfile?.Link2) &&
+                        string.IsNullOrEmpty(Model.UserProfile?.Link3))
+            {
+                <div class="no-data">No links added yet.</div>
             }
         </div>
+    </div>
 
-        <!-- Links Section -->
-        <div class="profile-section">
-            <h3 class="section-title">Links</h3>
-            <div class="links-list">
-                @if (!string.IsNullOrEmpty(Model.UserProfile?.Link1))
-                {
-                    <a href="@Model.UserProfile.Link1" target="_blank" class="link-item">@Model.UserProfile.Link1</a>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.UserProfile?.Link2))
-                {
-                    <a href="@Model.UserProfile.Link2" target="_blank" class="link-item">@Model.UserProfile.Link2</a>
-                }
-
-                @if (!string.IsNullOrEmpty(Model.UserProfile?.Link3))
-                {
-                    <a href="@Model.UserProfile.Link3" target="_blank" class="link-item">@Model.UserProfile.Link3</a>
-                }
-
-                @if (string.IsNullOrEmpty(Model.UserProfile?.Link1) &&
-                            string.IsNullOrEmpty(Model.UserProfile?.Link2) &&
-                            string.IsNullOrEmpty(Model.UserProfile?.Link3))
-                {
-                    <div class="no-data">No links added yet.</div>
-                }
-            </div>
-        </div>
-    }
 </div>
 
-<script>
-    // Simple interactivity
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Profile page loaded');
-
-        // Add click tracking for analytics (demo)
-        document.querySelectorAll('.link-item').forEach(link => {
-            link.addEventListener('click', function() {
-                console.log('Link clicked:', this.href);
-            });
-        });
-    });
-</script>
