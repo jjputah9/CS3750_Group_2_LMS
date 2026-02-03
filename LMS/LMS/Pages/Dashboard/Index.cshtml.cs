@@ -48,9 +48,12 @@ namespace LMS.Pages.Dashboard
                           (r, c) => c)
                     .ToListAsync();
             }
-            else if (CurrentUser.UserType == "Teacher")
+            else if (CurrentUser.UserType == "Instructor")
             {
-                // do later
+                // get courses the Instructor is responsible for (created)
+                Courses = await _context.Course
+                    .Where(r => r.InstructorEmail == CurrentUser.Email)
+                    .ToListAsync();
             }
         }
     }
