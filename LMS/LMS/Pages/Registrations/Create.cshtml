@@ -1,4 +1,5 @@
 ﻿@page
+@using Microsoft.AspNetCore.Razor.Language.Extensions
 @model LMS.Pages.Registrations.CreateModel
 
 @{
@@ -26,34 +27,34 @@ else
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].InstructorEmail)
+                Instructor Email
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].DeptName)
+                Department
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].CourseNum)
+                Course Number
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].CourseTitle)
+                Title
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].CreditHours)
+                Credit Hours
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].Capacity)
+                Capacity
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].Location)
+                Location
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].MeetDays)
+                Meeting Days
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].StartTime)
+                Start Time
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Courses[0].EndTime)
+                End Time
             </th>
             <th></th>
         </tr>
@@ -83,7 +84,7 @@ else
                 @Html.DisplayFor(modelItem => item.Location)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MeetDays)
+                <p>@FormatMeetDays(item.MeetDays)</p>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.StartTime)
@@ -110,4 +111,23 @@ else
     </tbody>
 </table>
 
+}
+
+@functions {
+    string FormatMeetDays(bool[] days)
+    {
+        if (days == null || days.Length < 5)
+            return "";
+
+        string[] labels = { "Mon", "Tue", "Wed", "Thu", "Fri" };
+        var result = new List<string>();
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (days[i])
+                result.Add(labels[i]);
+        }
+
+        return string.Join("/", result);
+    }
 }
