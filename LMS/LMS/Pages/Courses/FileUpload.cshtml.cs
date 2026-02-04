@@ -26,6 +26,11 @@ namespace computervision.aspcore.Pages
         }
         public async Task<IActionResult> OnPostUpload(FileUpload fileUpload)
         {
+            if (fileUpload.FormFile == null || fileUpload.FormFile.Length == 0)
+            {
+                ModelState.AddModelError("fileUpload.FormFile", "Please select a file to upload.");
+                return Page();
+            }
             var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "temp");
 
             //Creating upload folder
@@ -49,7 +54,7 @@ namespace computervision.aspcore.Pages
     }
     public class FileUpload
     {
-        [Required]
+        [Required(ErrorMessage = "Please select a file to upload.")]
         [Display(Name = "File")]
         public IFormFile FormFile { get; set; }
         public string SuccessMessage { get; set; }

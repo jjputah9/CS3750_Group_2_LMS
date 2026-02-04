@@ -14,6 +14,7 @@
             <span class="file-custom"></span>
         </label>
         <input asp-page-handler="Upload" class="btn btn-primary" type="submit" value="Upload">
+		<span asp-validation-for="fileUpload.FormFile" class="text-danger"></span>
     </div>
 
     @{
