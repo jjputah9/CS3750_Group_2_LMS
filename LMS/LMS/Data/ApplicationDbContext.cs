@@ -19,6 +19,8 @@ namespace LMS.Data
         // Add UserProfiles DbSet - make sure it matches your namespace
         public DbSet<UserProfile> UserProfiles { get; set; } = default!;
 
+        public DbSet<LMS.models.Assignment> Assignment { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
