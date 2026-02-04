@@ -51,6 +51,9 @@ namespace LMS.Pages.Profile
                 var existingProfile = await _context.UserProfiles
                     .FirstOrDefaultAsync(p => p.UserId == userId);
 
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
                 // Handle profile picture upload
                 if (ProfilePicture != null && ProfilePicture.Length > 0)
                 {
@@ -65,6 +68,18 @@ namespace LMS.Pages.Profile
                     // Update profile with picture data
                     await UpdateProfileWithPicture(existingProfile, userId, uploadResult);
                     TempData["ImageMessage"] = "Profile picture updated!";
+                }
+
+                // update AspNetUsers
+                // firstname, lastname, phone number, DOB
+                if (user != null)
+                {
+                    user.fName = Input.FirstName;
+                    user.lName = Input.LastName;
+                    user.PhoneNumber = Input.Phone;
+                    user.DOB = Input.BirthDate;
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
                 }
 
                 // Update or create profile
@@ -181,7 +196,6 @@ namespace LMS.Pages.Profile
                 profile = new UserProfile
                 {
                     UserId = userId,
-                    CreatedAt = DateTime.UtcNow
                 };
                 _context.UserProfiles.Add(profile);
             }
@@ -191,7 +205,7 @@ namespace LMS.Pages.Profile
             profile.ProfilePictureData = uploadResult.data;
             profile.ProfilePictureContentType = uploadResult.contentType;
             profile.ProfilePictureUploadedAt = DateTime.UtcNow;
-            profile.UpdatedAt = DateTime.UtcNow;
+
 
             await _context.SaveChangesAsync();
         }
@@ -215,8 +229,7 @@ namespace LMS.Pages.Profile
                     Phone = Input.Phone,
                     Link1 = Input.Link1,
                     Link2 = Input.Link2,
-                    Link3 = Input.Link3,
-                    CreatedAt = DateTime.UtcNow
+                    Link3 = Input.Link3
                 };
                 _context.UserProfiles.Add(newProfile);
             }
@@ -235,7 +248,6 @@ namespace LMS.Pages.Profile
                 existingProfile.Link1 = Input.Link1;
                 existingProfile.Link2 = Input.Link2;
                 existingProfile.Link3 = Input.Link3;
-                existingProfile.UpdatedAt = DateTime.UtcNow;
 
                 _context.UserProfiles.Update(existingProfile);
             }
@@ -272,10 +284,9 @@ namespace LMS.Pages.Profile
 
     public class ProfileInputModel
     {
-        [Required(ErrorMessage = "Description is required")]
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         [Display(Name = "Description")]
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "First Name is required")]
         [StringLength(50, ErrorMessage = "First Name cannot exceed 50 characters")]
@@ -287,9 +298,10 @@ namespace LMS.Pages.Profile
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Birth Date is required")]
         [Display(Name = "Birth Date")]
         [DataType(DataType.Date)]
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
         [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters")]
         [Display(Name = "Address Line 1")]
@@ -309,23 +321,22 @@ namespace LMS.Pages.Profile
         [Display(Name = "Zip Code")]
         public string? ZipCode { get; set; }
 
-        [Required(ErrorMessage = "Phone number is required")]
         [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
         [Phone(ErrorMessage = "Please enter a valid phone number")]
         [Display(Name = "Phone")]
-        public string Phone { get; set; } = string.Empty;
+        public string? Phone { get; set; } = string.Empty;
 
-        [StringLength(200, ErrorMessage = "Link cannot exceed 200 characters")]
+        [StringLength(300, ErrorMessage = "Link cannot exceed 200 characters")]
         [Url(ErrorMessage = "Please enter a valid URL")]
         [Display(Name = "Link 1")]
         public string? Link1 { get; set; }
 
-        [StringLength(200, ErrorMessage = "Link cannot exceed 200 characters")]
+        [StringLength(300, ErrorMessage = "Link cannot exceed 200 characters")]
         [Url(ErrorMessage = "Please enter a valid URL")]
         [Display(Name = "Link 2")]
         public string? Link2 { get; set; }
 
-        [StringLength(200, ErrorMessage = "Link cannot exceed 200 characters")]
+        [StringLength(300, ErrorMessage = "Link cannot exceed 200 characters")]
         [Url(ErrorMessage = "Please enter a valid URL")]
         [Display(Name = "Link 3")]
         public string? Link3 { get; set; }

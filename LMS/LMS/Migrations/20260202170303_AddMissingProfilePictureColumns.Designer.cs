@@ -75,7 +75,7 @@ namespace LMS.Migrations
                     b.ToTable("Course");
                 });
 
-            modelBuilder.Entity("LMS.models.ApplicationUser", b =>
+            modelBuilder.Entity("LMS.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -155,7 +155,7 @@ namespace LMS.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("LMS.models.UserProfile", b =>
+            modelBuilder.Entity("LMS.Models.UserProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -401,7 +401,7 @@ namespace LMS.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("LMS.models.ApplicationUser", null)
+                    b.HasOne("LMS.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -410,7 +410,7 @@ namespace LMS.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("LMS.models.ApplicationUser", null)
+                    b.HasOne("LMS.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -425,7 +425,7 @@ namespace LMS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LMS.models.ApplicationUser", null)
+                    b.HasOne("LMS.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -434,7 +434,7 @@ namespace LMS.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("LMS.models.ApplicationUser", null)
+                    b.HasOne("LMS.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

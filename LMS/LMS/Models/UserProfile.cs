@@ -23,8 +23,9 @@ namespace LMS.Models
         [StringLength(50)]
         public string LastName { get; set; } = string.Empty;
 
+        [Required]
         [DataType(DataType.Date)]
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
         [StringLength(100)]
         public string? AddressLine1 { get; set; }
@@ -41,9 +42,8 @@ namespace LMS.Models
         [StringLength(10)]
         public string? ZipCode { get; set; }
 
-        [Required]
         [StringLength(20)]
-        public string Phone { get; set; } = string.Empty;
+        public string? Phone { get; set; } = string.Empty;
 
         [StringLength(200)]
         public string? Link1 { get; set; }
@@ -68,10 +68,6 @@ namespace LMS.Models
 
         public DateTime? ProfilePictureUploadedAt { get; set; }
         // ========== END OF PROFILE PICTURE PROPERTIES ==========
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? UpdatedAt { get; set; }
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
