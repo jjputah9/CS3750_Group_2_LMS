@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "calendar": "^0.1.1",
+    "full": "^1.0.1"
+  }
+}
