@@ -48,10 +48,32 @@ namespace LMS.Pages.Dashboard
                           (r, c) => c)
                     .ToListAsync();
             }
-            else if (CurrentUser.UserType == "Teacher")
+            else if (CurrentUser.UserType == "Instructor")
             {
-                // do later
+                // get courses the Instructor is responsible for (created)
+                Courses = await _context.Course
+                    .Where(r => r.InstructorEmail == CurrentUser.Email)
+                    .ToListAsync();
             }
+        }
+
+        public async Task<IActionResult> OnGetGoToAssignmentsAsync(int courseId)
+        {
+            CurrentUser = await _userManager.GetUserAsync(User);
+            if (CurrentUser == null) return Challenge();
+
+            if (CurrentUser.UserType != "Instructor")
+                return Forbid();
+
+            var ownsCourse = await _context.Course
+                .AnyAsync(c => c.Id == courseId && c.InstructorEmail == CurrentUser.Email);
+
+            if (!ownsCourse)
+                return Forbid();
+
+            HttpContext.Session.SetInt32("ActiveCourseId", courseId);
+
+            return RedirectToPage("/Assignments/Index", new { courseId });
         }
     }
 }

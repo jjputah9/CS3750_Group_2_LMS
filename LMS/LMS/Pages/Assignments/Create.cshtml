@@ -1,0 +1,71 @@
+﻿@page "{courseId:int}"
+@model LMS.Pages.Assignments.CreateModel
+
+@{
+    ViewData["Title"] = "Create Assignment";
+}
+
+<div class="container mt-3">
+    <div class="p-3 p-md-4 bg-light border rounded-3">
+        <div class="text-uppercase text-muted small">Course</div>
+        <h1 class="mb-1">@Model.CourseHeader</h1>
+        <div class="text-muted">Create a new assignment for this course.</div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-7">
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <input type="hidden" asp-for="Assignment.CourseId" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="Assignment.Title" class="control-label"></label>
+                    <input asp-for="Assignment.Title" class="form-control" />
+                    <span asp-validation-for="Assignment.Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Assignment.Description" class="control-label"></label>
+                    <textarea asp-for="Assignment.Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Assignment.Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Assignment.Points" class="control-label"></label>
+                    <input asp-for="Assignment.Points" class="form-control" />
+                    <span asp-validation-for="Assignment.Points" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Assignment.DueDate" class="control-label"></label>
+                    <input asp-for="Assignment.DueDate" class="form-control" />
+                    <span asp-validation-for="Assignment.DueDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Assignment.SubmissionTypeId" class="control-label"></label>
+                    <select asp-for="Assignment.SubmissionTypeId"
+                            class="form-control"
+                            asp-items="ViewBag.SubmissionTypeId"></select>
+                    <span asp-validation-for="Assignment.SubmissionTypeId" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <a class="btn btn-outline-secondary"
+                       asp-page="./Index"
+                       asp-route-courseId="@Model.CourseId">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

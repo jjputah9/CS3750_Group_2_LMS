@@ -148,7 +148,7 @@ namespace LMS.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                    var user = CreateUser();
+                var user = CreateUser();
 
                 user.fName = Input.fName;
                 user.lName = Input.lName;
@@ -164,6 +164,12 @@ namespace LMS.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     await _userManager.AddToRoleAsync(user, Input.UserType);
+
+                    // add userType claim
+                    if (!string.IsNullOrEmpty(user.UserType))
+                    {
+                        await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("UserType", user.UserType));
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

@@ -32,3 +32,6 @@ LMS/LMS/Data/Migrations/
 *.log
 *.vsidx
 *.sqlite
+
+# node
+node_modules/
