@@ -1,0 +1,33 @@
+﻿@page
+@model LMS.Pages.Assignments.DeleteModel
+@{
+    ViewData["Title"] = "Delete Assignment";
+}
+
+<div class="container mt-3">
+    <div class="p-3 p-md-4 bg-light border rounded-3">
+        <div class="text-uppercase text-muted small">Delete</div>
+        <h1 class="mb-1">Delete assignment</h1>
+        <div class="text-muted">This action cannot be undone.</div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="alert alert-warning">
+        <div class="fw-bold">This will permanently delete:</div>
+        <div class="mt-1">
+            <span class="fw-semibold">@Model.Assignment.Title</span>
+            <span class="text-muted">
+                (@Model.Assignment.Points pts, due @Model.Assignment.DueDate.ToString("MMM d, yyyy"))
+            </span>
+        </div>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="Assignment.AssignmentId" />
+        <div class="d-flex gap-2">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <a class="btn btn-outline-secondary" asp-page="./Index" asp-route-courseId="@Model.CourseId">Cancel</a>
+        </div>
+    </form>
+</div>
