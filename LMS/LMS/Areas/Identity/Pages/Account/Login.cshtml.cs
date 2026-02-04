@@ -124,6 +124,18 @@ namespace LMS.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    
+                    // Get the user
+                    var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+
+                    // Check if the claim already exists
+                    var claims = await _signInManager.UserManager.GetClaimsAsync(user);
+                    if (!claims.Any(c => c.Type == "UserType"))
+                    {
+                        // Add a new claim for UserType
+                        await _signInManager.UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("UserType", user.UserType ?? ""));
+                    }
+
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

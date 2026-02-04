@@ -3,6 +3,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
@@ -18,13 +19,21 @@
     <li class="nav-item">
         <a class="nav-link text-dark" asp-page="/File">File</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-page="/Registrations/Create">Registration</a>
-    </li>
 
-    <li class="nav-item">
-        <a  class="nav-link text-dark" href="/Courses" title="Courses">Courses</a>
-    </li>
+     @if (User.HasClaim("UserType", "Student"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-page="/Registrations/Create">Registration</a>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/Courses" title="Courses">Courses</a>
+            </li>
+        }
+
+
     <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
             <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
