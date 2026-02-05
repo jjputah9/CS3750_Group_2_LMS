@@ -8,8 +8,62 @@ html {
   }
 }
 
+.btn-primary{
+  --inline-btn-color: #ffffff;
+  color: #fff;
+  background-color: #5fc3f2;
+  border-color: #5fc3f2;
+  border-width: 2px;
+  box-shadow:
+    inset -1px -1px var(--inline-btn-color),
+    inset 1px 1px var(--inline-btn-color),
+    inset 1px -1px var(--inline-btn-color),
+    inset -1px 1px var(--inline-btn-color),
+    2px 2px 2px #b5b5b5;
+
+  --bs-btn-hover-bg: #539ddb;
+  --bs-btn-hover-border-color: #539ddb;
+  --bs-btn-active-bg: #4e89d7;
+  --bs-btn-active-border-color: #4e89d7;
+}
+
+a, .btn-link {
+  color: #0b97d8;
+}
+
+.text-danger {
+  font-weight: bold;
+  color: #ef4a63 !important;
+}
+
+.alert {
+  --inline-btn-color: #ffffff;
+  border-width: 4px;
+  box-shadow:
+    inset -2px -2px var(--inline-btn-color),
+    inset 2px 2px var(--inline-btn-color),
+    inset 2px -2px var(--inline-btn-color),
+    inset -2px 2px var(--inline-btn-color);
+}
+
+.alert-info {
+  --bs-alert-color: #223887;
+  --bs-alert-bg: #a3c9ff;
+  --bs-alert-border-color: #a3c9ff;
+  --bs-alert-link-color: #062183;
+}
+
+.form-check-input:checked {
+  background-color: #0b97d8;
+}
+
+.card {
+  --bs-card-border-color: #0b97d8b3;
+  box-shadow: 3px 3px 2px #b5b5b5;
+}
+
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #55bbe0;
 }
 
 html {
