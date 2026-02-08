@@ -21,7 +21,7 @@
             <input type="hidden" asp-for="Course.InstructorEmail" value=@Model.Course.InstructorEmail>
             <div class="form-group">
 <span class="text-danger">*</span>
-                <label asp-for="Course.DeptName" class="control-label"></label>
+                <label asp-for="Course.DeptName" class="control-label">Department</label>
                 <select asp-for="Course.DeptName" class="form-control" aria-required="true">
                     <option value="CS">CS</option>
                     <option value="MATH">MATH</option>
@@ -33,18 +33,18 @@
                 <span asp-validation-for="Course.DeptName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Course.CourseNum" class="control-label"></label>
+                <label asp-for="Course.CourseNum" class="control-label">Course Number</label>
                 <input asp-for="Course.CourseNum" class="form-control" />
                 <span asp-validation-for="Course.CourseNum" class="text-danger"></span>
             </div>
             <div class="form-group">
 <span class="text-danger">*</span>
-                <label asp-for="Course.CourseTitle" class="control-label"></label>
+                <label asp-for="Course.CourseTitle" class="control-label">Title</label>
                 <input asp-for="Course.CourseTitle" class="form-control" aria-required="true"/>
                 <span asp-validation-for="Course.CourseTitle" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Course.CreditHours" class="control-label"></label>
+                <label asp-for="Course.CreditHours" class="control-label">Credit Hours</label>
                 <input asp-for="Course.CreditHours" class="form-control" />
                 <span asp-validation-for="Course.CreditHours" class="text-danger"></span>
             </div>
@@ -59,7 +59,7 @@
                 <span asp-validation-for="Course.Location" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Course.MeetDays" class="control-label"></label>
+                <label asp-for="Course.MeetDays" class="control-label">Meeting Days</label>
                 <ul>
                     <li>
                         <input type="checkbox" asp-for="Course.MeetDays[0]"/>
@@ -85,15 +85,16 @@
                 <span asp-validation-for="Course.MeetDays" class="text-danger">@Model.MeetDayWarning</span>
             </div>
             <div class="form-group">
-                <label asp-for="Course.StartTime" class="control-label"></label>
+                <label asp-for="Course.StartTime" class="control-label">Start Time</label>
                 <input asp-for="Course.StartTime" class="form-control" />
                 <span asp-validation-for="Course.StartTime" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Course.EndTime" class="control-label"></label>
+                <label asp-for="Course.EndTime" class="control-label">End Time</label>
                 <input asp-for="Course.EndTime" class="form-control" />
                 <span asp-validation-for="Course.EndTime" class="text-danger"></span>
             </div>
+            <br />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

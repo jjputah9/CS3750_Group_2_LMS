@@ -10,6 +10,7 @@
     <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2>Create a new account.</h2>
+            <p>Already Registered? <a asp-area="Identity" asp-page="Login">Log in</a></p>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
@@ -44,16 +45,16 @@
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <label>User Type</label>
-                <div class="form-check form-check-inline">
-					<input class="form-check-input" type="radio" asp-for="Input.UserType" value="Student" id="radioStudent" checked />
-					<label class="form-check-label" for="radioStudent">Student</label>
-                </div>
-				<div class="form-check form-check-inline">
-					<input class="form-check-input" type="radio" asp-for="Input.UserType" value="Instructor" id="radioTeacher" />
-					<label class="form-check-label" for="radioTeacher">Instructor</label>
-                </div>
+            <div class="form-floating mb-3 row">
+                <h4>Account Type<br></h4>
+                    <div class="form-check form-check-inline col-sm-3">
+                        <input class="btn-check" type="radio" asp-for="Input.UserType" value="Student" id="radioStudent" checked />
+                        <label class="btn btn-secondary" for="radioStudent">Student</label>
+                    </div>
+                    <div class="form-check form-check-inline col-sm-3">
+                        <input class="btn-check" type="radio" asp-for="Input.UserType" value="Instructor" id="radioTeacher" />
+                        <label class="btn btn-secondary" for="radioTeacher">Instructor</label>
+                    </div>
 				<span asp-validation-for="Input.UserType" class="text-danger"></span>
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Create Account</button>

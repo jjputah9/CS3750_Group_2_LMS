@@ -11,67 +11,77 @@
 
 <h1>Delete</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Are you sure you want to delete this course?</h3>
 <div>
-    <h4>Course</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.InstructorEmail)
+            Instructor Email
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.InstructorEmail)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.DeptName)
+            Department
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.DeptName)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.CourseNum)
+            Course Number
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.CourseNum)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.CourseTitle)
+            Course Title
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.CourseTitle)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.CreditHours)
+            Credit Hours
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.CreditHours)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.Capacity)
+            Capacity
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.Capacity)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.Location)
+            Location
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.Location)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.MeetDays)
+            Meeting Days
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Course.MeetDays)
+            @{
+                var days = new List<string>();
+                if (Model.Course.MeetDays != null)
+                {
+                    if (Model.Course.MeetDays[0]) days.Add("Mon");
+                    if (Model.Course.MeetDays[1]) days.Add("Tue");
+                    if (Model.Course.MeetDays[2]) days.Add("Wed");
+                    if (Model.Course.MeetDays[3]) days.Add("Thu");
+                    if (Model.Course.MeetDays[4]) days.Add("Fri");
+                }
+            }
+            @string.Join(", ", days)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.StartTime)
+            Start Time
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.StartTime)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Course.EndTime)
+            End Time
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Course.EndTime)
