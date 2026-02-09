@@ -1,27 +1,13 @@
-using LMS.Data;
+﻿using LMS.Data;
 using LMS.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
-// In Program.cs, add this before var app = builder.Build();
-var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+// Instead of reading from appsettings.json
+StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
     ?? builder.Configuration["Stripe:SecretKey"];
-
-if (!string.IsNullOrEmpty(stripeSecretKey))
-{
-    StripeConfiguration.ApiKey = stripeSecretKey;
-    Console.WriteLine("Stripe API key configured from environment variable.");
-}
-else
-{
-    Console.WriteLine("Warning: Stripe secret key not configured.");
-}
-
-// For publishable key if you need it elsewhere
-var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY")
-    ?? builder.Configuration["Stripe:PublishableKey"];
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
