@@ -28,6 +28,9 @@ namespace LMS.Pages.Dashboard
         // Courses for the dashboard
         public List<Course> Courses { get; set; } = new();
 
+        // Get assignments for the selected course
+        public List<Assignment> Assignments { get; set; } = new();
+
         // Fetch the user on GET request
         public async Task OnGetAsync()
         {
