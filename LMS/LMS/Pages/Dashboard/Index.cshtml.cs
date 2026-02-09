@@ -40,6 +40,7 @@ namespace LMS.Pages.Dashboard
             if (CurrentUser == null)
                 return;
 
+            // show courses the student is registered for or courses the instructor is responsible for
             if (CurrentUser.UserType == "Student")
             {
                 // get courses this student is regestered for
@@ -50,6 +51,15 @@ namespace LMS.Pages.Dashboard
                           c => c.Id,
                           (r, c) => c)
                     .ToListAsync();
+
+                // if student, also get assignments for registered courses
+                Assignments = await _context.Registration
+                    .Where(r => r.StudentID == CurrentUser.Id)
+                    .Join(_context.Assignment,
+                          r => r.CourseID,
+                          a => a.CourseId,
+                          (r, a) => a)
+                    .ToListAsync();
             }
             else if (CurrentUser.UserType == "Instructor")
             {
@@ -58,6 +68,7 @@ namespace LMS.Pages.Dashboard
                     .Where(r => r.InstructorEmail == CurrentUser.Email)
                     .ToListAsync();
             }
+
         }
 
         public async Task<IActionResult> OnGetGoToAssignmentsAsync(int courseId)
@@ -78,5 +89,6 @@ namespace LMS.Pages.Dashboard
 
             return RedirectToPage("/Assignments/Index", new { courseId });
         }
+
     }
 }

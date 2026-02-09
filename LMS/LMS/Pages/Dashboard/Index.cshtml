@@ -64,10 +64,14 @@
 
             @if (Model.Assignments != null && Model.Assignments.Count > 0)
             {
+                @foreach (var assignment in Model.Assignments)
+                {
+                    <p>@assignment.Title</p>
+                }
             }
             else
             {
-                
+                <p>No up coming assignments!</p>
             }
   
 
