@@ -177,7 +177,6 @@
         border: 1px solid #c3e6cb;
     }
 
-    /* Responsive */
     @@media (max-width: 768px) {
         .profile-stats {
             gap: 20px;
@@ -203,14 +202,13 @@
         </div>
     }
 
-    <!-- Profile Header -->
     <div class="profile-header">
         <div class="profile-photo">
             @if (!string.IsNullOrEmpty(Model.UserProfile?.ProfilePictureUrl))
             {
-                <img src="@Model.UserProfile.ProfilePictureUrl" 
-                    alt="Profile Photo" 
-                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+                <img src="@Model.UserProfile.ProfilePictureUrl"
+                     alt="Profile Photo"
+                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
             }
             else
             {
@@ -222,7 +220,6 @@
         <a href="/Profile/Edit" class="btn-edit">Edit Profile</a>
     </div>
 
-    <!-- About Section -->
     <div class="profile-section">
         <h3 class="section-title">About</h3>
         @if (!string.IsNullOrEmpty(Model.UserProfile?.Description))
@@ -235,7 +232,6 @@
         }
     </div>
 
-    <!-- Contact Information -->
     <div class="profile-section">
         <h3 class="section-title">Contact Information</h3>
 
@@ -244,12 +240,10 @@
             <div class="info-value">@Model.UserProfile?.Phone</div>
         </div>
 
-
         <div class="info-row">
             <div class="info-label">Birth Date:</div>
             <div class="info-value">@Model.UserProfile.BirthDate.ToString("MMMM dd, yyyy")</div>
         </div>
-     
 
         @if (!string.IsNullOrEmpty(Model.UserProfile?.AddressLine1))
         {
@@ -280,7 +274,6 @@
         }
     </div>
 
-    <!-- Links Section -->
     <div class="profile-section">
         <h3 class="section-title">Links</h3>
         <div class="links-list">
@@ -307,6 +300,4 @@
             }
         </div>
     </div>
-
 </div>
-

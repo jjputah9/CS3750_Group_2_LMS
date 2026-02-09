@@ -270,6 +270,11 @@
         }
 
         <form method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden field for RemovePhoto binding -->
+            <input type="hidden" asp-for="RemovePhoto" id="removePhotoHidden" />
+
             <!-- Profile Photo Section -->
             <div class="photo-section">
                 <div class="profile-photo-preview" id="photoPreview">
@@ -277,15 +282,15 @@
                     {
                         <img src="@Model.CurrentProfileImageUrl" alt="Profile Photo"
                              id="profileImage"
-                             onerror="document.getElementById('initialsDisplay').style.display='flex'; this.style.display='none';">
+                             onerror="handleImageError()">
                         <div id="initialsDisplay" style="display: none; font-size: 40px; color: #6c757d;">
-                            @Model.Input.FirstName?[0]@Model.Input.LastName?[0]
+                            @(Model.Input?.FirstName?[0])@(Model.Input?.LastName?[0])
                         </div>
                     }
                     else
                     {
                         <div id="initialsDisplay" style="font-size: 40px; color: #6c757d;">
-                            @Model.Input.FirstName?[0]@Model.Input.LastName?[0]
+                            @(Model.Input?.FirstName?[0])@(Model.Input?.LastName?[0])
                         </div>
                         <img id="profileImage" style="display: none;">
                     }
@@ -307,7 +312,7 @@
                         }
                     </div>
 
-                    <input type="file" id="fileInput" name="ProfilePicture"
+                    <input type="file" asp-for="ProfilePicture" id="fileInput"
                            accept=".jpg,.jpeg,.png,.gif" class="file-input"
                            onchange="previewImage(this)">
 
@@ -436,6 +441,19 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        // Function to handle image loading errors
+        function handleImageError() {
+            const profileImage = document.getElementById('profileImage');
+            const initialsDisplay = document.getElementById('initialsDisplay');
+
+            if (profileImage) {
+                profileImage.style.display = 'none';
+            }
+            if (initialsDisplay) {
+                initialsDisplay.style.display = 'flex';
+            }
+        }
+
         // Function to preview selected image
         function previewImage(input) {
             const file = input.files[0];
@@ -446,6 +464,9 @@
                 input.value = '';
                 return;
             }
+
+            // Clear the remove photo flag if a new file is selected
+            document.getElementById('removePhotoHidden').value = 'false';
 
             // Show progress
             showUploadStatus('Uploading...', true);
@@ -459,6 +480,7 @@
                 if (profileImage) {
                     profileImage.src = e.target.result;
                     profileImage.style.display = 'block';
+                    profileImage.onerror = handleImageError;
                     if (initialsDisplay) {
                         initialsDisplay.style.display = 'none';
                     }
@@ -484,25 +506,23 @@
             const initialsDisplay = document.getElementById('initialsDisplay');
             const fileInput = document.getElementById('fileInput');
 
+            // Hide the current image
             if (profileImage) {
                 profileImage.style.display = 'none';
-                profileImage.src = '';
             }
 
+            // Show initials
             if (initialsDisplay) {
                 initialsDisplay.style.display = 'flex';
             }
 
+            // Clear the file input
             if (fileInput) {
                 fileInput.value = '';
             }
 
-            // Add a hidden field to indicate photo removal
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'RemovePhoto';
-            hiddenInput.value = 'true';
-            document.querySelector('form').appendChild(hiddenInput);
+            // Set the hidden field to true to indicate photo removal
+            document.getElementById('removePhotoHidden').value = 'true';
 
             showUploadStatus('Photo will be removed when you save', false);
         }
@@ -518,6 +538,16 @@
             // Check file type
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
             if (!allowedTypes.includes(file.type)) {
+                alert('Only JPG, PNG, and GIF files are allowed.');
+                return false;
+            }
+
+            // Check file extension
+            const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+            const fileName = file.name.toLowerCase();
+            const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+            if (!hasValidExtension) {
                 alert('Only JPG, PNG, and GIF files are allowed.');
                 return false;
             }
@@ -580,16 +610,18 @@
             updateCharCount(); // Initial count
         }
 
-        // Image error handling
-        const profileImage = document.getElementById('profileImage');
-        if (profileImage) {
-            profileImage.addEventListener('error', function() {
-                this.style.display = 'none';
-                const initialsDisplay = document.getElementById('initialsDisplay');
-                if (initialsDisplay) {
-                    initialsDisplay.style.display = 'flex';
-                }
-            });
-        }
+        // Initialize image error handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileImage = document.getElementById('profileImage');
+            if (profileImage && profileImage.src) {
+                profileImage.onerror = handleImageError;
+            }
+
+            // Clear any existing file input value on page load
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.value = '';
+            }
+        });
     </script>
 }

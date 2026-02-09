@@ -11,7 +11,6 @@ namespace LMS.Pages
     [Authorize]
     public class ProfileModel : PageModel
     {
-        // Profile Properties
         public UserProfile? UserProfile { get; set; }
         public string FullName { get; set; }
         public string Initials { get; set; }
@@ -21,44 +20,24 @@ namespace LMS.Pages
         private readonly ApplicationDbContext _context;
 
         public ProfileModel(
-            UserManager<ApplicationUser> userManager
-            , ApplicationDbContext context)
+            UserManager<ApplicationUser> userManager,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _context = context;
         }
 
-        // property that holds the current user
         public ApplicationUser? CurrentUser { get; set; }
 
         public async Task OnGetAsync()
         {
-            // get logged in user
             CurrentUser = await _userManager.GetUserAsync(User);
 
             if (CurrentUser == null)
                 return;
 
-            // Load profile from database
             UserProfile = await _context.UserProfiles
-                .FirstOrDefaultAsync(p => p.UserId == @CurrentUser.Id);
-
-            if (UserProfile == null)
-            {
-                // Profile does not exist (new user), create one
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Id == @CurrentUser.Id);
-
-                UserProfile = new UserProfile
-                {
-                    UserId = user.Id,
-                    FirstName = user.fName,
-                    LastName = user.lName,
-                    BirthDate = user.DOB
-                };
-                _context.UserProfiles.Add(UserProfile);
-                await _context.SaveChangesAsync();
-            }
+                .FirstOrDefaultAsync(p => p.UserId == CurrentUser.Id);
 
             if (UserProfile != null)
             {
@@ -66,8 +45,6 @@ namespace LMS.Pages
                 Initials = UserProfile.Initials;
                 HasProfile = true;
             }
-
-
         }
 
         private string GetInitials(string firstName, string lastName)
@@ -77,6 +54,5 @@ namespace LMS.Pages
 
             return $"{firstName[0]}{lastName[0]}".ToUpper();
         }
-
     }
 }

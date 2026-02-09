@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using LMS.Data;
@@ -29,6 +29,9 @@ namespace LMS.Pages.Profile
         [BindProperty]
         public IFormFile? ProfilePicture { get; set; }
 
+        [BindProperty]
+        public bool RemovePhoto { get; set; }
+
         public string? CurrentProfileImageUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
@@ -54,9 +57,62 @@ namespace LMS.Pages.Profile
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Id == userId);
 
+                // Handle photo removal
+                if (RemovePhoto)
+                {
+                    if (existingProfile != null)
+                    {
+                        // Delete the physical file if it exists
+                        if (!string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
+                        {
+                            var filePath = Path.Combine(_environment.WebRootPath, "uploads", existingProfile.ProfilePictureFileName);
+                            if (System.IO.File.Exists(filePath))
+                            {
+                                try
+                                {
+                                    System.IO.File.Delete(filePath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning(ex, "Could not delete profile picture file: {FileName}", existingProfile.ProfilePictureFileName);
+                                }
+                            }
+                        }
+
+                        // Clear all photo-related fields
+                        existingProfile.ProfilePictureUrl = null;
+                        existingProfile.ProfilePictureFileName = null;
+                        existingProfile.ProfilePictureData = null;
+                        existingProfile.ProfilePictureContentType = null;
+                        existingProfile.ProfilePictureUploadedAt = null;
+
+                        _context.UserProfiles.Update(existingProfile);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    TempData["ImageMessage"] = "Profile photo removed!";
+                }
+
                 // Handle profile picture upload
                 if (ProfilePicture != null && ProfilePicture.Length > 0)
                 {
+                    // First, delete the old file if it exists
+                    if (existingProfile != null && !string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
+                    {
+                        var oldFilePath = Path.Combine(_environment.WebRootPath, "uploads", existingProfile.ProfilePictureFileName);
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            try
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Could not delete old profile picture file: {FileName}", existingProfile.ProfilePictureFileName);
+                            }
+                        }
+                    }
+
                     var uploadResult = await SaveProfilePicture(ProfilePicture, userId);
                     if (!uploadResult.success)
                     {
@@ -65,13 +121,23 @@ namespace LMS.Pages.Profile
                         return Page();
                     }
 
-                    // Update profile with picture data
-                    await UpdateProfileWithPicture(existingProfile, userId, uploadResult);
+                    if (existingProfile == null)
+                    {
+                        existingProfile = new UserProfile { UserId = userId };
+                        _context.UserProfiles.Add(existingProfile);
+                    }
+
+                    existingProfile.ProfilePictureUrl = uploadResult.url;
+                    existingProfile.ProfilePictureFileName = uploadResult.fileName;
+                    existingProfile.ProfilePictureData = uploadResult.data;
+                    existingProfile.ProfilePictureContentType = uploadResult.contentType;
+                    existingProfile.ProfilePictureUploadedAt = DateTime.UtcNow;
+
+                    await _context.SaveChangesAsync();
                     TempData["ImageMessage"] = "Profile picture updated!";
                 }
 
-                // update AspNetUsers
-                // firstname, lastname, phone number, DOB
+                // Update AspNetUsers table
                 if (user != null)
                 {
                     user.fName = Input.FirstName;
@@ -82,8 +148,49 @@ namespace LMS.Pages.Profile
                     await _context.SaveChangesAsync();
                 }
 
-                // Update or create profile
-                await SaveProfile(existingProfile, userId);
+                // Update or create profile (excluding photo fields which are handled separately)
+                if (existingProfile == null)
+                {
+                    var newProfile = new UserProfile
+                    {
+                        UserId = userId,
+                        FirstName = Input.FirstName,
+                        LastName = Input.LastName,
+                        Description = Input.Description,
+                        BirthDate = Input.BirthDate,
+                        AddressLine1 = Input.AddressLine1,
+                        AddressLine2 = Input.AddressLine2,
+                        City = Input.City,
+                        State = Input.State,
+                        ZipCode = Input.ZipCode,
+                        Phone = Input.Phone,
+                        Link1 = Input.Link1,
+                        Link2 = Input.Link2,
+                        Link3 = Input.Link3
+                    };
+                    _context.UserProfiles.Add(newProfile);
+                }
+                else
+                {
+                    // Update only non-photo fields
+                    existingProfile.FirstName = Input.FirstName;
+                    existingProfile.LastName = Input.LastName;
+                    existingProfile.Description = Input.Description;
+                    existingProfile.BirthDate = Input.BirthDate;
+                    existingProfile.AddressLine1 = Input.AddressLine1;
+                    existingProfile.AddressLine2 = Input.AddressLine2;
+                    existingProfile.City = Input.City;
+                    existingProfile.State = Input.State;
+                    existingProfile.ZipCode = Input.ZipCode;
+                    existingProfile.Phone = Input.Phone;
+                    existingProfile.Link1 = Input.Link1;
+                    existingProfile.Link2 = Input.Link2;
+                    existingProfile.Link3 = Input.Link3;
+
+                    _context.UserProfiles.Update(existingProfile);
+                }
+
+                await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Profile saved successfully!";
                 return RedirectToPage("/Profile");
@@ -146,7 +253,6 @@ namespace LMS.Pages.Profile
         {
             try
             {
-                // Validate
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
                 var extension = Path.GetExtension(file.FileName).ToLower();
 
@@ -156,22 +262,18 @@ namespace LMS.Pages.Profile
                 if (file.Length > 5 * 1024 * 1024)
                     return (false, "File must be less than 5MB.", null, null, null, null);
 
-                // Create folder
                 var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
                 if (!Directory.Exists(uploadsPath))
                     Directory.CreateDirectory(uploadsPath);
 
-                // Generate filename
                 var fileName = $"{userId}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
                 var filePath = Path.Combine(uploadsPath, fileName);
 
-                // Save file
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                // Read data
                 byte[] imageData;
                 using (var ms = new MemoryStream())
                 {
@@ -188,73 +290,6 @@ namespace LMS.Pages.Profile
             }
         }
 
-        private async Task UpdateProfileWithPicture(UserProfile? profile, string userId,
-            (bool success, string message, string url, string fileName, byte[] data, string contentType) uploadResult)
-        {
-            if (profile == null)
-            {
-                profile = new UserProfile
-                {
-                    UserId = userId,
-                };
-                _context.UserProfiles.Add(profile);
-            }
-
-            profile.ProfilePictureUrl = uploadResult.url;
-            profile.ProfilePictureFileName = uploadResult.fileName;
-            profile.ProfilePictureData = uploadResult.data;
-            profile.ProfilePictureContentType = uploadResult.contentType;
-            profile.ProfilePictureUploadedAt = DateTime.UtcNow;
-
-
-            await _context.SaveChangesAsync();
-        }
-
-        private async Task SaveProfile(UserProfile? existingProfile, string userId)
-        {
-            if (existingProfile == null)
-            {
-                var newProfile = new UserProfile
-                {
-                    UserId = userId,
-                    FirstName = Input.FirstName,
-                    LastName = Input.LastName,
-                    Description = Input.Description,
-                    BirthDate = Input.BirthDate,
-                    AddressLine1 = Input.AddressLine1,
-                    AddressLine2 = Input.AddressLine2,
-                    City = Input.City,
-                    State = Input.State,
-                    ZipCode = Input.ZipCode,
-                    Phone = Input.Phone,
-                    Link1 = Input.Link1,
-                    Link2 = Input.Link2,
-                    Link3 = Input.Link3
-                };
-                _context.UserProfiles.Add(newProfile);
-            }
-            else
-            {
-                existingProfile.FirstName = Input.FirstName;
-                existingProfile.LastName = Input.LastName;
-                existingProfile.Description = Input.Description;
-                existingProfile.BirthDate = Input.BirthDate;
-                existingProfile.AddressLine1 = Input.AddressLine1;
-                existingProfile.AddressLine2 = Input.AddressLine2;
-                existingProfile.City = Input.City;
-                existingProfile.State = Input.State;
-                existingProfile.ZipCode = Input.ZipCode;
-                existingProfile.Phone = Input.Phone;
-                existingProfile.Link1 = Input.Link1;
-                existingProfile.Link2 = Input.Link2;
-                existingProfile.Link3 = Input.Link3;
-
-                _context.UserProfiles.Update(existingProfile);
-            }
-
-            await _context.SaveChangesAsync();
-        }
-
         private async Task LoadCurrentImage()
         {
             try
@@ -266,79 +301,43 @@ namespace LMS.Pages.Profile
                 if (existingProfile != null)
                 {
                     if (!string.IsNullOrEmpty(existingProfile.ProfilePictureUrl))
-                    {
                         CurrentProfileImageUrl = existingProfile.ProfilePictureUrl;
-                    }
                     else if (!string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
-                    {
                         CurrentProfileImageUrl = $"/uploads/{existingProfile.ProfilePictureFileName}";
-                    }
                 }
             }
             catch
             {
-                // Ignore error
+                // ignore
             }
         }
     }
 
     public class ProfileInputModel
     {
-        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
-        [Display(Name = "Description")]
+        [StringLength(500)]
         public string? Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "First Name is required")]
-        [StringLength(50, ErrorMessage = "First Name cannot exceed 50 characters")]
-        [Display(Name = "First Name")]
+        [Required, StringLength(50)]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Last Name is required")]
-        [StringLength(50, ErrorMessage = "Last Name cannot exceed 50 characters")]
-        [Display(Name = "Last Name")]
+        [Required, StringLength(50)]
         public string LastName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Birth Date is required")]
-        [Display(Name = "Birth Date")]
-        [DataType(DataType.Date)]
+        [Required, DataType(DataType.Date)]
         public DateTime BirthDate { get; set; }
 
-        [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters")]
-        [Display(Name = "Address Line 1")]
         public string? AddressLine1 { get; set; }
-
-        [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters")]
-        [Display(Name = "Address Line 2")]
         public string? AddressLine2 { get; set; }
-
-        [StringLength(50, ErrorMessage = "City cannot exceed 50 characters")]
         public string? City { get; set; }
-
-        [StringLength(50, ErrorMessage = "State cannot exceed 50 characters")]
         public string? State { get; set; }
-
-        [StringLength(10, ErrorMessage = "Zip Code cannot exceed 10 characters")]
-        [Display(Name = "Zip Code")]
         public string? ZipCode { get; set; }
 
-        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
-        [Phone(ErrorMessage = "Please enter a valid phone number")]
-        [Display(Name = "Phone")]
+        [Phone]
         public string? Phone { get; set; } = string.Empty;
 
-        [StringLength(300, ErrorMessage = "Link cannot exceed 200 characters")]
-        [Url(ErrorMessage = "Please enter a valid URL")]
-        [Display(Name = "Link 1")]
-        public string? Link1 { get; set; }
-
-        [StringLength(300, ErrorMessage = "Link cannot exceed 200 characters")]
-        [Url(ErrorMessage = "Please enter a valid URL")]
-        [Display(Name = "Link 2")]
-        public string? Link2 { get; set; }
-
-        [StringLength(300, ErrorMessage = "Link cannot exceed 200 characters")]
-        [Url(ErrorMessage = "Please enter a valid URL")]
-        [Display(Name = "Link 3")]
-        public string? Link3 { get; set; }
+        [Url] public string? Link1 { get; set; }
+        [Url] public string? Link2 { get; set; }
+        [Url] public string? Link3 { get; set; }
     }
 }
