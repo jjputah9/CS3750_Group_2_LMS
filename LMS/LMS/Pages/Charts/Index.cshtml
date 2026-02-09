@@ -1,0 +1,40 @@
+﻿@page
+@model LMS.Pages.Charts.IndexModel
+@{
+}
+
+
+@{
+    ViewData["Title"] = "Charts";
+}
+
+<h2>Sample Google Chart</h2>
+
+<!-- Load Google Charts -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script type="text/javascript">
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Month', 'Sales'],
+            ['January',  1000],
+            ['February', 1170],
+            ['March',  660],
+            ['April',  1030]
+        ]);
+
+        var options = {
+            title: 'Monthly Sales',
+            width: 600,
+            height: 400
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+    }
+</script>
+
+<div id="chart_div"></div>

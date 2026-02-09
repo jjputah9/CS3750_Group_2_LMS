@@ -17,6 +17,10 @@
         <a class="nav-link text-dark" asp-page="/File">File</a>
     </li>
 
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-page="/Charts/Index">Chart</a>
+        </li>
+
      @if (User.HasClaim("UserType", "Student"))
         {
             <li class="nav-item">
