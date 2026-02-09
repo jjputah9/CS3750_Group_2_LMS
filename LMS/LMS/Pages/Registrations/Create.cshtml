@@ -1,133 +1,81 @@
 ﻿@page
-@using Microsoft.AspNetCore.Razor.Language.Extensions
+@using LMS.Models
 @model LMS.Pages.Registrations.CreateModel
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Registration";
 }
 
-@if (@Model.CurrentUser == null)
-{
-    <div class="text-center">
-    <p>Please Log in to view registration. <br><a href="/Identity/Account/Login">Course List (Instructors)</a></p>
-    </div>
-}
-else if (@Model.CurrentUser.UserType != "Student")
-{
-    <div class="text-center">
-    <p>The Registration Page is used by students. <br><a href="/Courses">Course List (Instructors)</a></p>
-    </div>
-}
-else
-{
-    
-<h1>Register</h1>
+<h1 class="mb-4">Add/Drop Courses</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Instructor Email
-            </th>
-            <th>
-                Department
-            </th>
-            <th>
-                Course Number
-            </th>
-            <th>
-                Title
-            </th>
-            <th>
-                Credit Hours
-            </th>
-            <th>
-                Capacity
-            </th>
-            <th>
-                Location
-            </th>
-            <th>
-                Meeting Days
-            </th>
-            <th>
-                Start Time
-            </th>
-            <th>
-                End Time
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Courses) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.InstructorEmail)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeptName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseNum)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreditHours)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Capacity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                <p>@FormatMeetDays(item.MeetDays)</p>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                <form method="post">
-                    <input type="hidden" asp-for="Registration.CourseID" value=@item.Id/>
-                    <input type="hidden" asp-for="Registration.StudentID" value=@Model.CurrentUser.Id/>
-                    @if (@Model.CheckRegistration(@Model.CurrentUser.Id, @item.Id))
-                    {
-                        <input type="submit" value="Drop Course" class="btn btn-primary" />
-                    }
-                    else
-                    {
-                        <input type="submit" value="Add Course" class="btn btn-primary" />
-                    }
-                </form>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-
-}
-
-@functions {
-    string FormatMeetDays(bool[] days)
+<div class="row">
+    @foreach (var item in Model.Courses)
     {
-        if (days == null || days.Length < 5)
-            return "";
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        @item.DeptName @item.CourseNum - @item.CourseTitle
+                    </h5>
 
-        string[] labels = { "Mon", "Tue", "Wed", "Thu", "Fri" };
-        var result = new List<string>();
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Instructor: @item.InstructorEmail
+                    </h6>
 
-        for (int i = 0; i < 5; i++)
-        {
-            if (days[i])
-                result.Add(labels[i]);
-        }
+                    <p class="card-text mb-1">
+                        <strong>Credits:</strong> @item.CreditHours
+                    </p>
 
-        return string.Join("/", result);
+                    <p class="card-text mb-1">
+                        <strong>Capacity:</strong> @item.Capacity
+                    </p>
+
+                    <p class="card-text mb-1">
+                        <strong>Location:</strong> @item.Location
+                    </p>
+
+                    <p class="card-text mb-1">
+                        <strong>Meeting Days:</strong>
+                        @{
+                            var days = new List<string>();
+                            if (item.MeetDays != null)
+                            {
+                                if (item.MeetDays[0]) days.Add("Mon");
+                                if (item.MeetDays[1]) days.Add("Tue");
+                                if (item.MeetDays[2]) days.Add("Wed");
+                                if (item.MeetDays[3]) days.Add("Thu");
+                                if (item.MeetDays[4]) days.Add("Fri");
+                            }
+                        }
+                        @string.Join(", ", days)
+                    </p>
+
+                    <p class="card-text mb-3">
+                        <strong>Time:</strong>
+                        @item.StartTime.ToShortTimeString() -
+                        @item.EndTime.ToShortTimeString()
+                    </p>
+
+                    <div class="d-grid mx-auto mt-auto col-10">
+                        <form method="post">
+                        <input type="hidden" asp-for="Registration.CourseID" value=@item.Id/>
+                        <input type="hidden" asp-for="Registration.StudentID" value=@Model.CurrentUser.Id/>
+                        <div class="row">
+                            @if (@Model.CheckRegistration(@Model.CurrentUser.Id, @item.Id))
+                            {
+                                <input class="btn btn-primary" type="submit" value="Drop Course" />
+                            }
+                            else
+                            {
+                                <input class="btn btn-primary" type="submit" value="Add Course"  />
+                            }
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
-}
+</div>
+
