@@ -59,6 +59,10 @@ namespace LMS.Pages.Dashboard
                           r => r.CourseID,
                           a => a.CourseId,
                           (r, a) => a)
+                    .Where(a => a.DueDate >= DateTime.Now) // only show upcoming assignments
+                    .OrderBy(a => a.DueDate)
+                    .Take(5)
+                    .Include(a => a.Course) // include course name for display
                     .ToListAsync();
             }
             else if (CurrentUser.UserType == "Instructor")

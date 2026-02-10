@@ -61,7 +61,10 @@
             <!-- ASSIGNMENTS -->
             <div class="col-lg-2 col-12 text-end">
 
-                <h6 class="text-muted d-block mb-3">Upcoming</h6>
+
+                <div class="col-12 text-muted">
+                    <h2>Upcoming:</h2>
+                </div>
 
                 @if (Model.Assignments != null && Model.Assignments.Count > 0)
                 {
@@ -69,9 +72,10 @@
                     {
                         <div class="card mb-2 p-2">
                             <div class="card-body p-2 text-end">
+                                <div>@assignment.Course?.DeptName @assignment.Course?.CourseNum</div>
                                 <div>@assignment.Title</div>
                                 <small class="text-muted">
-                                    @assignment.DueDate.ToString("MMM d")
+                                    @assignment.DueDate.ToString("MMM d 'at' hh:mm tt")
                                 </small>
                             </div>
                         </div>
