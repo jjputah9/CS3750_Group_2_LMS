@@ -5,83 +5,138 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome @Model.CurrentUser?.fName @Model.CurrentUser?.lName!</h1>
-    <h2>Dashboard</h2>
+    <h1 class="display-4">
+        Welcome @Model.CurrentUser?.fName @Model.CurrentUser?.lName!
+    </h1>
+</div>
 
-    <div class="container my-4">
-        <div class="row justify-content-center">
+<div class="container my-4">
 
-            @if (Model.CurrentUser?.UserType == "Student")
-            {
-                <h3>Your registered courses:</h3>
-                @if (Model.Courses != null && Model.Courses.Count > 0)
-                {
-                    foreach (var course in Model.Courses)
+    <!-- If student -->
+    @if (Model.CurrentUser?.UserType == "Student")
+    {
+        <div class="row align-items-start">
+
+            <div class="col-lg-10 col-12">
+                <div class="row">
+
+                    <div class="col-12">
+                        <h2>Dashboard:</h2>
+                    </div>
+
+                    <!-- Courses -->
+                    @if (Model.Courses != null && Model.Courses.Count > 0)
                     {
-                        <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
-                            <div class="card flex-fill d-flex flex-column">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">@course.CourseTitle</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">@course.DeptName @course.CourseNum</h6>
-                                    <p class="card-text">@course.Location</p>
-                                    <p class="card-text">@course.StartTime.ToString("h:mm tt") - @course.EndTime.ToString("h:mm tt") @FormatMeetDays(course.MeetDays)</p>
+                        foreach (var course in Model.Courses)
+                        {
+                            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
+                                <div class="card flex-fill d-flex flex-column">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">@course.CourseTitle</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            @course.DeptName @course.CourseNum
+                                        </h6>
+                                        <p class="card-text">@course.Location</p>
+                                        <p class="card-text">
+                                            @course.StartTime.ToString("h:mm tt")
+                                            -
+                                            @course.EndTime.ToString("h:mm tt")
+                                            @FormatMeetDays(course.MeetDays)
+                                        </p>
+                                    </div>
                                 </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">
+                            You are not registered for any courses!
+                        </p>
+                    }
+
+                </div>
+            </div>
+
+            <!-- ASSIGNMENTS -->
+            <div class="col-lg-2 col-12 text-end">
+
+                <h6 class="text-muted d-block mb-3">Upcoming</h6>
+
+                @if (Model.Assignments != null && Model.Assignments.Count > 0)
+                {
+                    @foreach (var assignment in Model.Assignments)
+                    {
+                        <div class="card mb-2 p-2">
+                            <div class="card-body p-2 text-end">
+                                <div>@assignment.Title</div>
+                                <small class="text-muted">
+                                    @assignment.DueDate.ToString("MMM d")
+                                </small>
                             </div>
                         </div>
                     }
-                } 
+                }
                 else
                 {
-                    <p class="text-muted"> You are not registered for any courses!</p>
-                }
-            }
-            else
-            {
-                <h3>Your courses:</h3>
-                foreach (var course in Model.Courses)
-                {
-                    <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
-                        <div class="card flex-fill d-flex flex-column">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">@course.CourseTitle</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">@course.DeptName @course.CourseNum</h6>
-                                <p class="card-text">@course.Location</p>
-                                <p class="card-text">@course.StartTime.ToString("h:mm tt") - @course.EndTime.ToString("h:mm tt") @FormatMeetDays(course.MeetDays)</p>
-
-                                <div class="mt-auto">
-                                    <a class="btn btn-primary w-100"
-                                       asp-page="/Dashboard/Index"
-                                       asp-page-handler="GoToAssignments"
-                                       asp-route-courseId="@course.Id">
-                                        Manage Assignments
-                                    </a>
-                                </div>
-                            </div>
+                    <div class="card p-2">
+                        <div class="card-body p-2 text-end text-muted">
+                            No upcoming assignments
                         </div>
                     </div>
                 }
-            }
 
-            @if (Model.Assignments != null && Model.Assignments.Count > 0)
-            {
-                @foreach (var assignment in Model.Assignments)
-                {
-                    <p>@assignment.Title</p>
-                }
-            }
-            else
-            {
-                <p>No up coming assignments!</p>
-            }
-  
+            </div>
 
-            
 
         </div>
-    </div>
+    }
+    else
+    {
+        <!-- If Professor -->
+        <div class="row">
+            <div class="col-12">
+                <h3>Dashboard:</h3>
+            </div>
 
-    
+            <!-- Juat have courses -->
+            @foreach (var course in Model.Courses)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex">
+                    <div class="card flex-fill d-flex flex-column">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@course.CourseTitle</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                @course.DeptName @course.CourseNum
+                            </h6>
+                            <p class="card-text">@course.Location</p>
+                            <p class="card-text">
+                                @course.StartTime.ToString("h:mm tt")
+                                -
+                                @course.EndTime.ToString("h:mm tt")
+                                @FormatMeetDays(course.MeetDays)
+                            </p>
+
+                            <div class="mt-auto">
+                                <a class="btn btn-primary w-100"
+                                   asp-page="/Dashboard/Index"
+                                   asp-page-handler="GoToAssignments"
+                                   asp-route-courseId="@course.Id">
+                                    Manage Assignments
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
 </div>
+
+
+
+
 
 @functions {
     string FormatMeetDays(bool[] days)
