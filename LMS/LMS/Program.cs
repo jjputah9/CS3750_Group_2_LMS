@@ -6,7 +6,7 @@ using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 // Instead of reading from appsettings.json
-StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("sk_test_51SwPAbQeeHKH9xZ6eSHc7lrlZO54BpiBraW4BfJSNkLwXKKrPdTEfyMAfDFGhSLRZXLK4ZUKRGc8MQkey5SSrCy200e1DbSdEb")
     ?? builder.Configuration["Stripe:SecretKey"];
 
 // Add services to the container.

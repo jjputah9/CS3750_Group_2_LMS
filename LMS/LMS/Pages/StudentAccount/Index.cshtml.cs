@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,22 +16,29 @@ namespace LMS.Pages.StudentAccount
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<IndexModel> _logger;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<IndexModel> logger)
         {
             _userManager = userManager;
             _context = context;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public ApplicationUser CurrentUser { get; set; }
         public List<Course> RegisteredCourses { get; set; } = new();
         public int TotalCredits { get; set; }
         public decimal Tuition { get; set; }
+        public decimal TotalPaid { get; set; }
         public string StripePublishableKey { get; set; }
+
+      
+        public List<Payment> RecentPayments { get; set; } = new();
 
         [BindProperty]
         public decimal PaymentAmount { get; set; }
@@ -62,17 +69,51 @@ namespace LMS.Pages.StudentAccount
             // Sum total credits
             TotalCredits = RegisteredCourses.Sum(c => c.CreditHours);
 
-            // Tuition = $100 per credit
-            Tuition = TotalCredits * 100;
+            // Total tuition = $100 per credit
+            var totalTuition = TotalCredits * 100;
+
+            // Calculate total payments made
+            TotalPaid = await _context.Payments
+                .Where(p => p.StudentId == CurrentUser.Id && p.Status == "Completed")
+                .SumAsync(p => p.Amount);
+
+            // Remaining balance = total tuition - payments made
+            Tuition = totalTuition - TotalPaid;
+
+           
+            RecentPayments = await _context.Payments
+                .Where(p => p.StudentId == CurrentUser.Id && p.Status == "Completed")
+                .OrderByDescending(p => p.PaymentDate)
+                .Take(5)
+                .ToListAsync();
 
             // Get Stripe publishable key
-            StripePublishableKey = _configuration["Stripe:PublishableKey"];
+            StripePublishableKey = _configuration["pk_test_51SwPAbQeeHKH9xZ6cogbadiQKgppICfOhZGEg5Cw1aMSDsmjcZhgzcYNZU6qJi0UyeIsvZjBc9BPGVrMsUFhuhWn009dlx00Vg\r\n"];
+        }
+
+        private async Task SavePaymentRecord(string studentId, decimal amount, string paymentType, string stripeSessionId)
+        {
+            var payment = new Payment
+            {
+                StudentId = studentId,
+                Amount = amount,
+                PaymentType = paymentType,
+                StripeSessionId = stripeSessionId,
+                PaymentDate = DateTime.UtcNow,
+                Status = "Completed",
+                Notes = $"Payment processed via Stripe. Session: {stripeSessionId}"
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"✅ Payment saved: ${amount} for student {studentId}");
         }
 
         // Full payment endpoint
         public async Task<IActionResult> OnPostCreateCheckoutSessionAsync()
         {
-            await LoadUserData(); // Load data again for POST
+            await LoadUserData();
 
             if (CurrentUser == null || CurrentUser.UserType != "Student")
                 return RedirectToPage("/Error");
@@ -107,8 +148,9 @@ namespace LMS.Pages.StudentAccount
                     }
                 },
                 Mode = "payment",
-                SuccessUrl = Url.Page("/StudentAccount/Success", null, new { amount = Tuition }, Request.Scheme),
-                CancelUrl = Url.Page("/StudentAccount/Index", null, null, Request.Scheme),
+               
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Success?amount={Tuition}",
+                CancelUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Index",
                 CustomerEmail = CurrentUser.Email,
                 Metadata = new Dictionary<string, string>
                 {
@@ -121,13 +163,16 @@ namespace LMS.Pages.StudentAccount
             var service = new SessionService();
             Session session = await service.CreateAsync(options);
 
+            // Save payment record
+            await SavePaymentRecord(CurrentUser.Id, Tuition, "full_tuition", session.Id);
+
             return Redirect(session.Url);
         }
 
-        // Custom payment endpoint
+        // Custom payment
         public async Task<IActionResult> OnPostCreateCustomCheckoutSessionAsync()
         {
-            await LoadUserData(); // Load data again for POST
+            await LoadUserData();
 
             if (CurrentUser == null || CurrentUser.UserType != "Student")
                 return RedirectToPage("/Error");
@@ -162,8 +207,9 @@ namespace LMS.Pages.StudentAccount
                     }
                 },
                 Mode = "payment",
-                SuccessUrl = Url.Page("/StudentAccount/Success", null, new { amount = PaymentAmount }, Request.Scheme),
-                CancelUrl = Url.Page("/StudentAccount/Index", null, null, Request.Scheme),
+             
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Success?amount={PaymentAmount}",
+                CancelUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Index",
                 CustomerEmail = CurrentUser.Email,
                 Metadata = new Dictionary<string, string>
                 {
@@ -175,6 +221,9 @@ namespace LMS.Pages.StudentAccount
 
             var service = new SessionService();
             Session session = await service.CreateAsync(options);
+
+            // Save payment record
+            await SavePaymentRecord(CurrentUser.Id, PaymentAmount, "partial_tuition", session.Id);
 
             return Redirect(session.Url);
         }

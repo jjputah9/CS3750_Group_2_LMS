@@ -17,6 +17,10 @@ namespace LMS.Data
         // Registration DbSet
         public DbSet<Registration> Registration { get; set; } = default!;
 
+        //Payment DbSet
+        public DbSet<Payment> Payments { get; set; } = default!;
+
+
         // Add UserProfiles DbSet - make sure it matches your namespace
         public DbSet<UserProfile> UserProfiles { get; set; } = default!;
 
