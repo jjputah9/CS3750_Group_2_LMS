@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using LMS.Data;
-using LMS.models;
 using LMS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
