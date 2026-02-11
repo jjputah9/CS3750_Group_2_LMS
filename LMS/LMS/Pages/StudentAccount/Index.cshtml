@@ -15,18 +15,25 @@
             <span>ID: @Model.CurrentUser?.Id</span>
         </div>
         <div class="card-body">
-            <p class="mb-2"><strong>Balance:</strong> $@Model.Tuition.ToString("F2")</p>
             <p class="mb-2"><strong>Total Credits:</strong> @Model.TotalCredits</p>
+            <p class="mb-2"><strong>Total Tuition:</strong> $@((Model.TotalCredits * 100).ToString("F2"))</p>
+
+            @if (Model.TotalPaid > 0)
+            {
+                <p class="mb-2 text-success"><strong>Total Paid:</strong> $@Model.TotalPaid.ToString("F2")</p>
+            }
+
+            <p class="mb-2"><strong>Remaining Balance:</strong> $@Model.Tuition.ToString("F2")</p>
 
             <div class="d-flex gap-2 mt-3">
                 <form method="post" asp-page-handler="CreateCheckoutSession" id="fullPaymentForm">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-success" id="payFullBtn">
+                    <button type="submit" class="btn btn-success" id="payFullBtn" @(Model.Tuition <= 0 ? "disabled" : "")>
                         <i class="fas fa-credit-card me-2"></i>Pay Full Amount ($@Model.Tuition.ToString("F2"))
                     </button>
                 </form>
 
-                <button id="customAmountBtn" class="btn btn-primary">
+                <button id="customAmountBtn" class="btn btn-primary" @(Model.Tuition <= 0 ? "disabled" : "")>
                     <i class="fas fa-money-bill-wave me-2"></i>Pay Custom Amount
                 </button>
             </div>
@@ -67,7 +74,7 @@
                         <tr class="table-active">
                             <td><strong>Total</strong></td>
                             <td><strong>@Model.TotalCredits</strong></td>
-                            <td><strong>$@Model.Tuition.ToString("F2")</strong></td>
+                            <td><strong>$@((Model.TotalCredits * 100).ToString("F2"))</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -78,6 +85,66 @@
             }
         </div>
     </div>
+
+    <!-- ✅ PAYMENT HISTORY SECTION - ADD THIS -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <strong>Payment History</strong>
+        </div>
+        <div class="card-body">
+            @if (Model.RecentPayments.Count > 0)
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model.RecentPayments)
+                        {
+                            <tr>
+                                <td>@payment.PaymentDate.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</td>
+                                <td class="text-success fw-bold">$@payment.Amount.ToString("F2")</td>
+                                <td>
+                                    @if (payment.PaymentType == "full_tuition")
+                                    {
+                                        <span class="badge bg-primary">Full Payment</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">Partial Payment</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Completed</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-light">
+                            <td colspan="2"><strong>Total Paid:</strong></td>
+                            <td colspan="2"><strong class="text-success">$@Model.TotalPaid.ToString("F2")</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                @if (Model.RecentPayments.Count >= 5)
+                {
+                    <p class="text-muted small mb-0">Showing last 5 payments</p>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0">No payment history yet.</p>
+            }
+        </div>
+    </div>
+    <!-- ✅ END PAYMENT HISTORY SECTION -->
 
 </div>
 
@@ -93,7 +160,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info">
-                        <strong>Total Tuition:</strong> $@Model.Tuition.ToString("F2")
+                        <strong>Total Tuition:</strong> $@((Model.TotalCredits * 100).ToString("F2"))<br />
+                        <strong>Paid So Far:</strong> $@Model.TotalPaid.ToString("F2")<br />
+                        <strong>Remaining Balance:</strong> $@Model.Tuition.ToString("F2")
                     </div>
                     <div class="mb-3">
                         <label asp-for="PaymentAmount" class="form-label">Enter amount to pay ($):</label>
@@ -117,7 +186,7 @@
 
     <script>
         // Open modal for custom payment
-        document.getElementById("customAmountBtn").addEventListener("click", function () {
+        document.getElementById("customAmountBtn")?.addEventListener("click", function () {
             var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
             modal.show();
         });
@@ -131,7 +200,6 @@
                 return false;
             }
 
-            // Show loading state
             var button = document.getElementById("payFullBtn");
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
             button.disabled = true;
@@ -151,12 +219,11 @@
                 return false;
             } else if (amount > maxAmount) {
                 e.preventDefault();
-                alert(`Payment cannot exceed total tuition of $${maxAmount}`);
+                alert(`Payment cannot exceed remaining balance of $${maxAmount}`);
                 amountInput.focus();
                 return false;
             }
 
-            // Show loading state
             var button = document.getElementById("customPayBtn");
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
             button.disabled = true;
