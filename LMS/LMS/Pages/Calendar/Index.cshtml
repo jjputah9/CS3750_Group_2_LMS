@@ -1,5 +1,22 @@
 ﻿@page
 @model LMS.Pages.Calendar.IndexModel
+@using System.Text.Json
+@using System.Linq
+@{
+    var events = Model.AllCourses.Select(item => new {
+        title = item.CourseTitle,
+        startTime = item.StartTime.ToString("HH:mm"),
+        endTime = item.EndTime.ToString("HH:mm"),
+        daysOfWeek = (item.MeetDays != null)
+            ? item.MeetDays
+                .Select((isOn, idx) => new { isOn, idx })
+                .Where(x => x.isOn && x.idx >= 0 && x.idx < 5) 
+                .Select(x => x.idx + 1) 
+                .ToArray()
+            : new int[0]
+    });
+    var eventsJson = JsonSerializer.Serialize(events);
+}
 @{
 }
 
@@ -7,17 +24,25 @@
     <meta charset='utf-8' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
     <script>
-
         document.addEventListener('DOMContentLoaded', function() {
           var calendarEl = document.getElementById('calendar');
           var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth'
+              initialView: 'dayGridMonth',
+              events: [                   
+              ].concat(@Html.Raw(eventsJson))
           });
           calendar.render();
         });
-
     </script>
 </head>
 <body>
     <div id='calendar'></div>
+
+    @foreach (var item in Model.AllCourses)
+    {
+        <div>
+            <h3>@item.CourseTitle</h3>
+            <p>@item.StartTime.ToString("g") - @item.EndTime.ToString("g")</p>
+        </div>
+    }
 </body>
