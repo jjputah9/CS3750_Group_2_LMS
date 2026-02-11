@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LMS.Data;
-using LMS.models;
 using LMS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;          // IMPORTANT for Session extensions
