@@ -25,6 +25,15 @@
                                     <h6 class="card-subtitle mb-2 text-muted">@course.DeptName @course.CourseNum</h6>
                                     <p class="card-text">@course.Location</p>
                                     <p class="card-text">@course.StartTime.ToString("h:mm tt") - @course.EndTime.ToString("h:mm tt") @FormatMeetDays(course.MeetDays)</p>
+
+                                    <div class="mt-auto">
+                                        <a class="btn btn-primary w-100"
+                                           asp-page="/Dashboard/Index"
+                                           asp-page-handler="GoToStudentAssignments"
+                                           asp-route-courseId="@course.Id">
+                                            View Assignments
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

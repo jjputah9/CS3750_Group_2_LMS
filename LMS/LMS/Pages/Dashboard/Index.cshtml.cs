@@ -75,5 +75,24 @@ namespace LMS.Pages.Dashboard
 
             return RedirectToPage("/Assignments/Index", new { courseId });
         }
+
+        public async Task<IActionResult> OnGetGoToStudentAssignmentsAsync(int courseId)
+        { 
+            CurrentUser = await _userManager.GetUserAsync(User);
+            if (CurrentUser == null) return Challenge();
+
+            if (CurrentUser.UserType != "Student")
+                return Forbid();
+
+            var isRegistered = await _context.Registration
+                .AnyAsync(r => r.CourseID == courseId && r.StudentID == CurrentUser.Id);
+
+            if (!isRegistered)
+                return Forbid();
+
+            HttpContext.Session.SetInt32("ActiveCourseId", courseId);
+
+            return RedirectToPage("/Assignments/StudentAssignments", new { courseId });
+        }
     }
 }
