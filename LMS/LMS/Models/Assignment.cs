@@ -1,7 +1,7 @@
 ﻿using LMS.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace LMS.models
+namespace LMS.Models
 {
     public class Assignment
     {

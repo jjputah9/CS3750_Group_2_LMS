@@ -15,12 +15,28 @@
             <span>ID: @Model.CurrentUser?.Id</span>
         </div>
         <div class="card-body">
-            <p class="mb-2"><strong>Balance:</strong> $@Model.Tuition</p>
+            <p class="mb-2"><strong>Balance:</strong> $@Model.Tuition.ToString("F2")</p>
+            <p class="mb-2"><strong>Total Credits:</strong> @Model.TotalCredits</p>
 
             <div class="d-flex gap-2 mt-3">
-                <button id="payBtn" class="btn btn-success">Make Payment</button>
-                <button id="customAmountBtn" class="btn btn-primary">Pay Custom</button>
+                <form method="post" asp-page-handler="CreateCheckoutSession" id="fullPaymentForm">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success" id="payFullBtn">
+                        <i class="fas fa-credit-card me-2"></i>Pay Full Amount ($@Model.Tuition.ToString("F2"))
+                    </button>
+                </form>
+
+                <button id="customAmountBtn" class="btn btn-primary">
+                    <i class="fas fa-money-bill-wave me-2"></i>Pay Custom Amount
+                </button>
             </div>
+
+            @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+            {
+                <div class="alert alert-danger mt-3">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
         </div>
     </div>
 
@@ -36,6 +52,7 @@
                         <tr>
                             <th>Course</th>
                             <th>Credits</th>
+                            <th>Cost</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,8 +61,14 @@
                             <tr>
                                 <td>@course.CourseTitle</td>
                                 <td>@course.CreditHours</td>
+                                <td>$@((course.CreditHours * 100).ToString("F2"))</td>
                             </tr>
                         }
+                        <tr class="table-active">
+                            <td><strong>Total</strong></td>
+                            <td><strong>@Model.TotalCredits</strong></td>
+                            <td><strong>$@Model.Tuition.ToString("F2")</strong></td>
+                        </tr>
                     </tbody>
                 </table>
             }
@@ -58,46 +81,98 @@
 
 </div>
 
-<!-- Modal for custom / split payment -->
+<!-- Modal for custom payment -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="paymentModalLabel">Custom Payment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Total Tuition: $@Model.Tuition</p>
-                <label for="paymentAmount" class="form-label">Enter amount to pay:</label>
-                <input type="number" id="paymentAmount" class="form-control" max="@Model.Tuition" min="1" value="@Model.Tuition" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button id="confirmPaymentBtn" type="button" class="btn btn-primary">Pay Now</button>
-            </div>
+            <form method="post" asp-page-handler="CreateCustomCheckoutSession" id="customPaymentForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Custom Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>Total Tuition:</strong> $@Model.Tuition.ToString("F2")
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PaymentAmount" class="form-label">Enter amount to pay ($):</label>
+                        <input type="number" asp-for="PaymentAmount" class="form-control"
+                               step="0.01" min="0.50" max="@Model.Tuition" value="@Model.Tuition" required />
+                        <span asp-validation-for="PaymentAmount" class="text-danger"></span>
+                        <div class="form-text">Minimum payment: $0.50</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="customPayBtn">Pay Now</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        // Full payment button
-        document.getElementById("payBtn").addEventListener("click", function () {
-            alert("Paying full tuition of $@Model.Tuition (placeholder). Stripe integration will go here.");
-        });
+    <partial name="_ValidationScriptsPartial" />
 
-        // Open modal for custom / split payment
+    <script>
+        // Open modal for custom payment
         document.getElementById("customAmountBtn").addEventListener("click", function () {
             var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
             modal.show();
         });
 
-        // Confirm custom payment
-        document.getElementById("confirmPaymentBtn").addEventListener("click", function () {
-            var amount = document.getElementById("paymentAmount").value;
-            alert("Paying $" + amount + " (placeholder). Stripe integration will go here.");
-            var modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
-            modal.hide();
+        // Full payment form validation
+        document.getElementById("fullPaymentForm")?.addEventListener("submit", function (e) {
+            var tuition = @Model.Tuition;
+            if (tuition <= 0) {
+                e.preventDefault();
+                alert("You don't have any tuition balance to pay.");
+                return false;
+            }
+
+            // Show loading state
+            var button = document.getElementById("payFullBtn");
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            button.disabled = true;
+            return true;
+        });
+
+        // Custom payment form validation
+        document.getElementById("customPaymentForm")?.addEventListener("submit", function (e) {
+            var amountInput = document.querySelector('input[name="PaymentAmount"]');
+            var amount = parseFloat(amountInput.value);
+            var maxAmount = @Model.Tuition;
+
+            if (isNaN(amount) || amount < 0.5) {
+                e.preventDefault();
+                alert('Minimum payment amount is $0.50');
+                amountInput.focus();
+                return false;
+            } else if (amount > maxAmount) {
+                e.preventDefault();
+                alert(`Payment cannot exceed total tuition of $${maxAmount}`);
+                amountInput.focus();
+                return false;
+            }
+
+            // Show loading state
+            var button = document.getElementById("customPayBtn");
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            button.disabled = true;
+            return true;
+        });
+
+        // Auto format the payment amount input
+        document.querySelector('input[name="PaymentAmount"]')?.addEventListener("input", function () {
+            var max = @Model.Tuition;
+            var value = parseFloat(this.value);
+
+            if (value > max) {
+                this.value = max.toFixed(2);
+            } else if (value < 0.5) {
+                this.value = "0.50";
+            }
         });
     </script>
 }
