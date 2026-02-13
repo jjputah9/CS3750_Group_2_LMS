@@ -3,6 +3,15 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script language="JavaScript" type="text/javascript" src="lib/bootstrap/dist/js/bootstrap.js"></script>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="popover"]').popover();
+});
+</script>
+</head>
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
@@ -10,7 +19,10 @@
     <li class="nav-item">
         <a class="nav-link text-dark" asp-page="/Profile">Profile</a>
     </li>
-        <a class="nav-link" asp-page="/StudentAccount/Index">Account</a>
+
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-page="/StudentAccount/Index">Account</a>
+    </li>
 
     <li class="nav-item">
         <a class="nav-link text-dark" asp-page="/Calendar/Index">Calendar</a>
@@ -39,6 +51,15 @@
             <button  type="submit" class="nav-link text-dark">Logout</button>
         </form>
     </li>
+
+    @if (User.HasClaim("UserType", "Student"))
+        {
+            <li class="nav-item">
+                <button type="button" class="btn" data-toggle="popover" title="Notifications" data-content="Notifs">
+                    <img src="images/BellIcon.png" alt="Notifications" height="25" width="25"/>
+                </button>
+            </li>
+        }
 }
 else
 {
