@@ -16,6 +16,15 @@
             : new int[0]
     });
     var eventsJson = JsonSerializer.Serialize(events);
+
+    var assignmentEvents = Model.AllAssignments.Select(a => new
+    {
+        title = "📌 " + a.Title,
+        start = a.DueDate.ToString("yyyy-MM-ddTHH:mm"),
+        allDay = false
+    });
+
+    var assignmentEventsJson = JsonSerializer.Serialize(assignmentEvents);
 }
 @{
 }
@@ -28,8 +37,9 @@
           var calendarEl = document.getElementById('calendar');
           var calendar = new FullCalendar.Calendar(calendarEl, {
               initialView: 'dayGridMonth',
+              defaultTimedEventDuration: '00:00:01',
               events: [                   
-              ].concat(@Html.Raw(eventsJson))
+              ].concat(@Html.Raw(eventsJson)).concat(@Html.Raw(assignmentEventsJson))
           });
           calendar.render();
         });
