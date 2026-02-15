@@ -9,73 +9,153 @@
 
 <h1 class="mb-4">Add/Drop Courses</h1>
 
+<!-- ===================== Search / Filter Section ===================== -->
+<form method="get">
+    <div class="row mb-2">
+
+        <!-- Search box -->
+        <div class="col-md-5">
+            <input type="text"
+                   name="SearchTerm"
+                   value="@Model.SearchTerm"
+                   class="form-control"
+                   placeholder="Search course title, dept, number..." />
+        </div>
+
+        <!-- Department dropdown -->
+        <div class="col-md-4">
+            <select name="SelectedDepartment"
+                    asp-items="Model.DepartmentList"
+                    class="form-select">
+                <option value="">All Departments</option>
+            </select>
+        </div>
+
+        <!-- Advanced Filters toggle button -->
+        <div class="col-md-3 text-end">
+            <button type="button" class="btn btn-secondary" id="toggleAdvanced">
+                Advanced Filters
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Advanced Filters Section (hidden by default) -->
+    <div class="row mb-3" id="advancedFilters" style="display:none;">
+        <div class="col-md-4 offset-md-5">
+            <select name="SelectedCredits"
+                    asp-items="Model.CreditList"
+                    class="form-select">
+                <option value="">All Credits</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Search button -->
+    <div class="row mb-4">
+        <div class="col-md-2 offset-md-10">
+            <button type="submit"
+                    class="btn btn-primary w-100">
+                Search
+            </button>
+        </div>
+    </div>
+</form>
+<!-- =================================================================== -->
+<!-- ===================== Course Cards ===================== -->
 <div class="row">
-    @foreach (var item in Model.Courses)
+    @if (Model.Courses.Any())
     {
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">
-                        @item.DeptName @item.CourseNum - @item.CourseTitle
-                    </h5>
+        @foreach (var item in Model.Courses)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
 
-                    <h6 class="card-subtitle mb-2 text-muted">
-                        Instructor: @item.InstructorEmail
-                    </h6>
+                        <h5 class="card-title">
+                            @item.DeptName @item.CourseNum - @item.CourseTitle
+                        </h5>
 
-                    <p class="card-text mb-1">
-                        <strong>Credits:</strong> @item.CreditHours
-                    </p>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Instructor: @item.InstructorEmail
+                        </h6>
 
-                    <p class="card-text mb-1">
-                        <strong>Capacity:</strong> @item.Capacity
-                    </p>
+                        <p class="card-text mb-1">
+                            <strong>Credits:</strong> @item.CreditHours
+                        </p>
 
-                    <p class="card-text mb-1">
-                        <strong>Location:</strong> @item.Location
-                    </p>
+                        <p class="card-text mb-1">
+                            <strong>Capacity:</strong> @item.Capacity
+                        </p>
 
-                    <p class="card-text mb-1">
-                        <strong>Meeting Days:</strong>
-                        @{
-                            var days = new List<string>();
-                            if (item.MeetDays != null)
-                            {
-                                if (item.MeetDays[0]) days.Add("Mon");
-                                if (item.MeetDays[1]) days.Add("Tue");
-                                if (item.MeetDays[2]) days.Add("Wed");
-                                if (item.MeetDays[3]) days.Add("Thu");
-                                if (item.MeetDays[4]) days.Add("Fri");
+                        <p class="card-text mb-1">
+                            <strong>Location:</strong> @item.Location
+                        </p>
+
+                        <p class="card-text mb-1">
+                            <strong>Meeting Days:</strong>
+                            @{
+                                var days = new List<string>();
+                                if (item.MeetDays != null)
+                                {
+                                    if (item.MeetDays[0]) days.Add("Mon");
+                                    if (item.MeetDays[1]) days.Add("Tue");
+                                    if (item.MeetDays[2]) days.Add("Wed");
+                                    if (item.MeetDays[3]) days.Add("Thu");
+                                    if (item.MeetDays[4]) days.Add("Fri");
+                                }
                             }
-                        }
-                        @string.Join(", ", days)
-                    </p>
+                            @string.Join(", ", days)
+                        </p>
 
-                    <p class="card-text mb-3">
-                        <strong>Time:</strong>
-                        @item.StartTime.ToShortTimeString() -
-                        @item.EndTime.ToShortTimeString()
-                    </p>
+                        <p class="card-text mb-3">
+                            <strong>Time:</strong>
+                            @item.StartTime.ToShortTimeString() -
+                            @item.EndTime.ToShortTimeString()
+                        </p>
 
-                    <div class="d-grid mx-auto mt-auto col-10">
-                        <form method="post">
-                        <input type="hidden" asp-for="Registration.CourseID" value=@item.Id/>
-                        <input type="hidden" asp-for="Registration.StudentID" value=@Model.CurrentUser.Id/>
-                        <div class="row">
-                            @if (@Model.CheckRegistration(@Model.CurrentUser.Id, @item.Id))
-                            {
-                                <input class="btn btn-primary" type="submit" value="Drop Course" />
-                            }
-                            else
-                            {
-                                <input class="btn btn-primary" type="submit" value="Add Course"  />
-                            }
+                        <div class="d-grid mx-auto mt-auto col-10">
+                            <form method="post">
+                                <input type="hidden" asp-for="Registration.CourseID" value="@item.Id" />
+                                <input type="hidden" asp-for="Registration.StudentID" value="@Model.CurrentUser.Id" />
+                                <div class="row">
+                                    @if (Model.CheckRegistration(Model.CurrentUser.Id, item.Id))
+                                    {
+                                        <input class="btn btn-primary" type="submit" value="Drop Course" />
+                                    }
+                                    else
+                                    {
+                                        <input class="btn btn-primary" type="submit" value="Add Course" />
+                                    }
+                                </div>
+                            </form>
                         </div>
-                        </form>
+
                     </div>
                 </div>
             </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <p class="text-muted">No courses found for your search/filter criteria.</p>
         </div>
     }
 </div>
+<!-- ========================================================== -->
+<!-- ===================== Toggle Advanced Filters Script ===================== -->
+@section Scripts {
+    <script>
+        const toggleBtn = document.getElementById('toggleAdvanced');
+        const advancedDiv = document.getElementById('advancedFilters');
 
+        toggleBtn.addEventListener('click', function () {
+            if (advancedDiv.style.display === 'none') {
+                advancedDiv.style.display = 'flex';
+            } else {
+                advancedDiv.style.display = 'none';
+            }
+        });
+    </script>
+}

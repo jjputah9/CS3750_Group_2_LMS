@@ -1,6 +1,8 @@
+using LMS.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using LMS.Models;
 
 
 namespace LMS.Models;
@@ -17,4 +19,5 @@ public class Registration
 
     [DataType(DataType.DateTime)]
     public DateTime RegistrationDateTime {get; set;} //date and time of registration
+
 }
