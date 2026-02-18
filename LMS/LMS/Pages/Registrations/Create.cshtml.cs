@@ -14,40 +14,99 @@ namespace LMS.Pages.Registrations
 {
     public class CreateModel : PageModel
     {
-        private readonly LMS.Data.ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public CreateModel(UserManager<ApplicationUser> userManager, LMS.Data.ApplicationDbContext context)
+        public CreateModel(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _context = context;
             _userManager = userManager;
         }
 
-        public async Task OnGet()
-        {
-            Courses = await _context.Course.ToListAsync();
-            CurrentUser = await _userManager.GetUserAsync(User);
-        }
-
-        //Needed tables: Registration, Courses, Current User
-
+        // Registration property for Add/Drop
         [BindProperty]
         public Registration Registration { get; set; } = default!;
 
+        // List of courses displayed on page
         public IList<Course> Courses { get; set; } = default!;
 
+        // Current logged-in user
         public ApplicationUser? CurrentUser { get; set; } = default!;
 
-        // For more information, see https://aka.ms/RazorPagesCRUD.
+        // Search/filter properties
+        [BindProperty(SupportsGet = true)]
+        public string? SearchTerm { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? SelectedDepartment { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public int? SelectedCredits { get; set; }
+
+        // Dropdown lists
+        public SelectList? DepartmentList { get; set; }
+        public SelectList? CreditList { get; set; }
+
+        // GET handler
+        public async Task OnGet()
+        {
+            CurrentUser = await _userManager.GetUserAsync(User);
+
+            // Start query for courses
+            IQueryable<Course> courseQuery = _context.Course;
+
+            // Apply Search filter
+            if (!string.IsNullOrEmpty(SearchTerm))
+            {
+                courseQuery = courseQuery.Where(c =>
+                    c.CourseTitle.Contains(SearchTerm) ||
+                    c.DeptName.Contains(SearchTerm) ||
+                    c.CourseNum.ToString().Contains(SearchTerm));
+            }
+
+            // Apply Department dropdown filter
+            if (!string.IsNullOrEmpty(SelectedDepartment))
+            {
+                courseQuery = courseQuery.Where(c => c.DeptName == SelectedDepartment);
+            }
+
+            // Apply Credits filter (Advanced)
+            if (SelectedCredits.HasValue)
+            {
+                courseQuery = courseQuery.Where(c => c.CreditHours == SelectedCredits);
+            }
+
+            // Execute query
+            Courses = await courseQuery.ToListAsync();
+
+            // Populate dropdown lists
+            DepartmentList = new SelectList(
+                await _context.Course
+                    .Select(c => c.DeptName)
+                    .Distinct()
+                    .ToListAsync());
+
+            CreditList = new SelectList(
+                await _context.Course
+                    .Select(c => c.CreditHours)
+                    .Distinct()
+                    .ToListAsync());
+        }
+
+        // POST handler for Add/Drop courses
         public async Task<IActionResult> OnPostAsync()
         {
             if (CheckRegistration(Registration.StudentID, Registration.CourseID))
             {
-                _context.Registration.Remove(_context.Registration.First(e => e.CourseID == Registration.CourseID && e.StudentID == Registration.StudentID));
+                // Drop course
+                var reg = _context.Registration
+                    .First(e => e.CourseID == Registration.CourseID && e.StudentID == Registration.StudentID);
+                _context.Registration.Remove(reg);
                 await _context.SaveChangesAsync();
             }
             else
             {
+                // Add course
                 Registration.RegistrationDateTime = DateTime.Now;
                 _context.Registration.Add(Registration);
                 await _context.SaveChangesAsync();
@@ -56,7 +115,7 @@ namespace LMS.Pages.Registrations
             return RedirectToPage("/Registrations/Create");
         }
 
-        // Returns true if the given user is registered in the given course, false otherwise
+        // Check if student is already registered
         public bool CheckRegistration(string StudentId, int CourseId)
         {
             return _context.Registration.Any(e => e.CourseID == CourseId && e.StudentID == StudentId);

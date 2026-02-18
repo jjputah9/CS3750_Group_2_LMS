@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LMS.Data;
 using LMS.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;          // IMPORTANT for Session extensions
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +19,20 @@ namespace LMS.Pages.Assignments
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public StudentAssignmentsModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public StudentAssignmentsModel(
+            ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager,
+            IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _userManager = userManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IList<Assignment> Assignment { get; set; } = new List<Assignment>();
+        public HashSet<int> SubmittedAssignmentIds { get; set; } = new HashSet<int>();
 
         public int CourseId { get; set; }
         public string CourseHeader { get; set; } = "";
@@ -33,7 +41,7 @@ namespace LMS.Pages.Assignments
         {
             var activeCourseId = HttpContext.Session.GetInt32("ActiveCourseId");
             if (activeCourseId == null || activeCourseId.Value != courseId)
-                return Forbid(); //Figure out later why this doesn't work
+                return Forbid();
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
@@ -52,6 +60,20 @@ namespace LMS.Pages.Assignments
                 .Include(a => a.SubmissionType)
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
+
+            // Check which assignments have been submitted
+            foreach (var assignment in Assignment)
+            {
+                var submissionsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "submissions", assignment.AssignmentId.ToString());
+                if (Directory.Exists(submissionsFolder))
+                {
+                    var files = Directory.GetFiles(submissionsFolder, $"{user.Id}_{assignment.AssignmentId}_*");
+                    if (files.Any())
+                    {
+                        SubmittedAssignmentIds.Add(assignment.AssignmentId);
+                    }
+                }
+            }
 
             return Page();
         }
