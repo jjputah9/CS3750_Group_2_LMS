@@ -47,9 +47,20 @@
                             <td>@item.DueDate.ToString("MMM d, yyyy")</td>
                             <td class="d-none d-md-table-cell">@item.SubmissionType?.TypeName</td>
                             <td class="text-end">
-                                <a class="btn btn-sm btn-primary ms-1">
-                                    Submit
-                                </a>
+                                @if (Model.SubmittedAssignmentIds.Contains(item.AssignmentId))
+                                {
+                                    <button type="button" class="btn btn-sm btn-secondary ms-1" disabled>
+                                        <i class="bi bi-check-circle"></i> Submitted
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-sm btn-primary ms-1"
+                                       asp-page="/Assignments/AssignmentSubmit"
+                                       asp-route-assignmentId="@item.AssignmentId">
+                                        Submit
+                                    </a>
+                                }
                             </td>
                         </tr>
                     }
