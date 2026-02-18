@@ -19,6 +19,8 @@ namespace LMS.Pages.Calendar
         }
 
         public List<Course> AllCourses { get; set; } = new List<Course>();
+        
+        public List<Assignment> AllAssignments { get; set; } = new List<Assignment>();
 
         public async Task OnGetAsync()
         {
@@ -34,6 +36,17 @@ namespace LMS.Pages.Calendar
                 AllCourses = await _context.Course
                     .Where(c => c.InstructorEmail == user.Email)
                     .ToListAsync();
+
+                AllAssignments = await _context.Set<Course>()
+                    .Where(c => c.InstructorEmail == user.Email)
+                    .Join(
+                        _context.Assignment,
+                        c => c.Id,                                     // course PK
+                        a => a.CourseId,                                // assignment -> course FK
+                        (c, a) => a
+                    )
+                    .Distinct()
+                    .ToListAsync();
             }
             else if (string.Equals(user.UserType, "Student", StringComparison.OrdinalIgnoreCase))
             {
@@ -47,6 +60,17 @@ namespace LMS.Pages.Calendar
                         r => r.CourseID,                                // registration -> course FK
                         c => c.Id,                                     // course PK
                         (r, c) => c
+                    )
+                    .Distinct()
+                    .ToListAsync();
+
+                AllAssignments = await _context.Set<Registration>()
+                    .Where(r => r.StudentID == user.Id)
+                    .Join(
+                        _context.Assignment,
+                        r => r.CourseID,                                // registration -> course FK
+                        a => a.CourseId,                                // assignment -> course FK
+                        (r, a) => a
                     )
                     .Distinct()
                     .ToListAsync();
