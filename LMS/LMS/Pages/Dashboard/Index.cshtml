@@ -81,6 +81,12 @@
                                 <small class="text-muted">
                                     @assignment.DueDate.ToString("MMM d 'at' hh:mm tt")
                                 </small>
+                                <br/>
+                                <a class="btn btn-sm btn-primary ms-1"
+                                    asp-page="/Assignments/AssignmentSubmit"
+                                    asp-route-assignmentId="@assignment.AssignmentId">
+                                    Submission
+                                </a>
                             </div>
                         </div>
                     }
