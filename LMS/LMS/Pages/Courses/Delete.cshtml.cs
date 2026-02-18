@@ -49,14 +49,29 @@ namespace LMS.Pages.Courses
             }
 
             var course = await _context.Course.FindAsync(id);
-            if (course != null)
+            if (course == null)
             {
-                Course = course;
-                _context.Course.Remove(Course);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
+
+            // 1️⃣ Block anonymous users
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Forbid(); // blocks users not logged in
+            }
+
+            // 2️⃣ Only the instructor who owns the course can delete it
+            if (course.InstructorEmail != User.Identity?.Name)
+            {
+                return Forbid(); // blocks other instructors
+            }
+
+            // 3️⃣ Delete the course
+            _context.Course.Remove(course);
+            await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }
+
     }
 }
