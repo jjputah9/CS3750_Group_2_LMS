@@ -8,7 +8,7 @@
 <script language="JavaScript" type="text/javascript" src="lib/bootstrap/dist/js/bootstrap.js"></script>
 <script>
 $(document).ready(function(){
-  $('[data-toggle="popover"]').popover();
+  $('[data-toggle="popover"]').popover({title: "Notifications", content: "New Assignment for CS 3750"});
 });
 </script>
 </head>
@@ -55,7 +55,7 @@ $(document).ready(function(){
     @if (User.HasClaim("UserType", "Student"))
         {
             <li class="nav-item">
-                <button type="button" class="btn" data-toggle="popover" title="Notifications" data-content="Notifs">
+                <button type="button" class="btn" data-toggle="popover">
                     <img src="images/BellIcon.png" alt="Notifications" height="25" width="25"/>
                 </button>
             </li>
