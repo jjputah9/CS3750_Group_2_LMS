@@ -1,0 +1,62 @@
+﻿@page "{assignmentId:int}"
+@model LMS.Pages.Assignments.AssignmentSubmitModel
+@{
+    ViewData["Title"] = "Submit Assignment";
+}
+
+<div class="container mt-3">
+    <div class="p-3 p-md-4 bg-light border rounded-3">
+        <h1>Submit Assignment</h1>
+        <h3>@Model.Assignment?.Title</h3>
+        <p class="text-muted">Due: @Model.Assignment?.DueDate.ToString("MMM d, yyyy h:mm tt")</p>
+        <p>@Model.Assignment?.Description</p>
+        <p><strong>Points:</strong> @Model.Assignment?.Points</p>
+    </div>
+
+    <div class="mt-4">
+        @if (Model.SubmissionTypeName == "File Upload")
+        {
+            <form method="post" enctype="multipart/form-data">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Upload Your File</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="fileUpload" class="form-label">Select File</label>
+                            <input type="file" class="form-control" id="fileUpload" asp-for="SubmittedFile" required>
+                            <span asp-validation-for="SubmittedFile" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                        <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        }
+        else if (Model.SubmissionTypeName == "Text Entry")
+        {
+            <form method="post">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Enter Your Submission</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="textSubmission" class="form-label">Your Answer</label>
+                            <textarea class="form-control" id="textSubmission" asp-for="TextSubmission" rows="10" required></textarea>
+                            <span asp-validation-for="TextSubmission" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                        <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                Unknown submission type. Please contact your instructor.
+            </div>
+        }
+    </div>
+</div>
