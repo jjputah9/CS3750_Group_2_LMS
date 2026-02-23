@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using LMS.Data;
 using LMS.Models;
+using Microsoft.AspNetCore.Authorization; 
 
 namespace LMS.Pages.Courses
 {
+    [Authorize] // require login
     public class CreateModel : PageModel
     {
         private readonly LMS.Data.ApplicationDbContext _context;
@@ -29,9 +31,14 @@ namespace LMS.Pages.Courses
 
         public string MeetDayWarning { get; set; } = "";
 
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            //  block anonymous POST
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Challenge();
+            }
+
             if (!Course.MeetDays.Contains(true))
             {
                 MeetDayWarning = "At least one day needs to be selected.";
@@ -48,7 +55,6 @@ namespace LMS.Pages.Courses
             }
 
             Course.InstructorEmail = User.Identity?.Name;
-
 
             _context.Course.Add(Course);
             await _context.SaveChangesAsync();
