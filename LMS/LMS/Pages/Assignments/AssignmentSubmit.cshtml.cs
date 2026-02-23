@@ -66,6 +66,8 @@ namespace LMS.Pages.Assignments
                 HasSubmitted = files.Any();
             }
 
+            HttpContext.Session.SetInt32("ActiveCourseId", Assignment.CourseId);
+
             return Page();
         }
 
