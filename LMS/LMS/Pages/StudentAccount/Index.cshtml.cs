@@ -91,7 +91,7 @@ namespace LMS.Pages.StudentAccount
             StripePublishableKey = _configuration["pk_test_51SwPAbQeeHKH9xZ6cogbadiQKgppICfOhZGEg5Cw1aMSDsmjcZhgzcYNZU6qJi0UyeIsvZjBc9BPGVrMsUFhuhWn009dlx00Vg\r\n"];
         }
 
-        private async Task SavePaymentRecord(string studentId, decimal amount, string paymentType, string stripeSessionId)
+        public async Task SavePaymentRecord(string studentId, decimal amount, string paymentType, string stripeSessionId)
         {
             var payment = new Payment
             {
