@@ -1,0 +1,39 @@
+﻿@page "{assignmentId:int}"
+@model LMS.Pages.Assignments.SubmissionsModel
+@{
+}
+
+<h2>@Model.Assignment.Title - Submissions</h2>
+
+@if (Model.SubmissionFiles.Count == 0)
+{
+    <div class="alert alert-info">
+        No submissions yet.
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var file in Model.SubmissionFiles)
+            {
+                <tr>
+                    <td>@file</td>
+                    <td>
+                        <a href="~/submissions/@Model.Assignment.AssignmentId/@file"
+                           class="btn btn-sm btn-outline-primary"
+                           target="_blank">
+                            Download
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
