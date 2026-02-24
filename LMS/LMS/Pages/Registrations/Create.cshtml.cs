@@ -48,7 +48,7 @@ namespace LMS.Pages.Registrations
         public SelectList? CreditList { get; set; }
 
         // GET handler
-        public async Task OnGet()
+        public async Task OnGetAsync()
         {
             CurrentUser = await _userManager.GetUserAsync(User);
 
