@@ -1,39 +1,47 @@
 ﻿@page "{assignmentId:int}"
 @model LMS.Pages.Assignments.SubmissionsModel
+
 @{
+    ViewData["Title"] = "Submissions";
 }
 
-<h2>@Model.Assignment.Title - Submissions</h2>
+<div class="container mt-4">
+    <h2>Submissions</h2>
 
-@if (Model.SubmissionFiles.Count == 0)
-{
-    <div class="alert alert-info">
-        No submissions yet.
-    </div>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>File</th>
-                <th>Download</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var file in Model.SubmissionFiles)
-            {
+    @if (!Model.Submissions.Any())
+    {
+        <div class="alert alert-info">
+            No submissions yet.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>@file</td>
-                    <td>
-                        <a href="~/submissions/@Model.Assignment.AssignmentId/@file"
-                           class="btn btn-sm btn-outline-primary"
-                           target="_blank">
-                            Download
-                        </a>
-                    </td>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Submissions)
+                {
+                    <tr>
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                        <td>@item.SubmittedAt</td>
+                        <td>@item.Status</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                                Grade
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
