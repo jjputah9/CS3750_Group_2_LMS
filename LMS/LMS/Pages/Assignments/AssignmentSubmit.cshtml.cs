@@ -62,6 +62,8 @@ namespace LMS.Pages.Assignments
             HasSubmitted = await _context.submittedAssignments
                 .AnyAsync(s => s.AssignmentId == assignmentId && s.StudentId.ToString() == user.Id);
 
+            HttpContext.Session.SetInt32("ActiveCourseId", Assignment.CourseId);
+
             return Page();
         }
 
