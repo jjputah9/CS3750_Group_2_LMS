@@ -80,7 +80,10 @@ public class SearchBarUnitTests
 
     private CreateModel SetupPageModel(ApplicationDbContext context)
     {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var uManager = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+
         uManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>()))
         .ReturnsAsync(new ApplicationUser{});
         uManager.Setup(userManager => userManager.IsInRoleAsync(It.IsAny<ApplicationUser>(), "Student"))
