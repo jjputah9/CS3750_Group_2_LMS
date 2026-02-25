@@ -12,7 +12,7 @@ namespace LMS.Models
         public int AssignmentId { get; set; }
 
         [Required]
-        public int StudentId { get; set; }
+        public string StudentId { get; set; } = string.Empty; // Changed from int to string
 
         [Required]
         public int submissionTypeId { get; set; }
@@ -26,6 +26,5 @@ namespace LMS.Models
         public string textSubmission { get; set; } = string.Empty;
 
         public int grade { get; set; }
-
     }
 }
