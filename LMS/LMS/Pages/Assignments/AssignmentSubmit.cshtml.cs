@@ -58,13 +58,9 @@ namespace LMS.Pages.Assignments
 
             SubmissionTypeName = Assignment.SubmissionType?.TypeName ?? "";
 
-            // Check if student has already submitted
-            var submissionsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "submissions", assignmentId.ToString());
-            if (Directory.Exists(submissionsFolder))
-            {
-                var files = Directory.GetFiles(submissionsFolder, $"{user.Id}_{assignmentId}_*");
-                HasSubmitted = files.Any();
-            }
+            // Check if student has already submitted (check database)
+            HasSubmitted = await _context.submittedAssignments
+                .AnyAsync(s => s.AssignmentId == assignmentId && s.StudentId.ToString() == user.Id);
 
             return Page();
         }
@@ -85,17 +81,18 @@ namespace LMS.Pages.Assignments
 
             SubmissionTypeName = Assignment.SubmissionType?.TypeName ?? "";
 
-            // Check if already submitted
-            var submissionsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "submissions", assignmentId.ToString());
-            if (Directory.Exists(submissionsFolder))
+            // Check if already submitted (check database)
+            var existingSubmission = await _context.submittedAssignments
+                .FirstOrDefaultAsync(s => s.AssignmentId == assignmentId && s.StudentId.ToString() == user.Id);
+
+            if (existingSubmission != null)
             {
-                var existingFiles = Directory.GetFiles(submissionsFolder, $"{user.Id}_{assignmentId}_*");
-                if (existingFiles.Any())
-                {
-                    TempData["ErrorMessage"] = "You have already submitted this assignment.";
-                    return RedirectToPage("/Assignments/StudentAssignments", new { courseId = Assignment.CourseId });
-                }
+                TempData["ErrorMessage"] = "You have already submitted this assignment.";
+                return RedirectToPage("/Assignments/StudentAssignments", new { courseId = Assignment.CourseId });
             }
+
+            var submissionsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "submissions", assignmentId.ToString());
+            string filePath = "";
 
             if (SubmissionTypeName == "File Upload")
             {
@@ -114,13 +111,28 @@ namespace LMS.Pages.Assignments
                 // Create filename: studentId_assignmentId_timestamp_originalFileName
                 var fileExtension = Path.GetExtension(SubmittedFile.FileName);
                 var fileName = $"{user.Id}_{assignmentId}_{DateTime.Now:yyyyMMddHHmmss}{fileExtension}";
-                var filePath = Path.Combine(submissionsFolder, fileName);
+                filePath = Path.Combine(submissionsFolder, fileName);
 
                 // Save the file
                 using (var stream = System.IO.File.Create(filePath))
                 {
                     await SubmittedFile.CopyToAsync(stream);
                 }
+
+                // Save to database
+                var submission = new submittedAssignment
+                {
+                    AssignmentId = assignmentId,
+                    StudentId = user.Id, // NOTE: This assumes user.Id can be parsed to int
+                    submissionTypeId = Assignment.SubmissionTypeId,
+                    filePath = $"/submissions/{assignmentId}/{fileName}",
+                    submissionDate = DateTime.Now,
+                    textSubmission = "",
+                    grade = 0
+                };
+
+                _context.submittedAssignments.Add(submission);
+                await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "File submitted successfully!";
             }
@@ -140,10 +152,25 @@ namespace LMS.Pages.Assignments
 
                 // Create filename: studentId_assignmentId_timestamp.txt
                 var fileName = $"{user.Id}_{assignmentId}_{DateTime.Now:yyyyMMddHHmmss}.txt";
-                var filePath = Path.Combine(submissionsFolder, fileName);
+                filePath = Path.Combine(submissionsFolder, fileName);
 
                 // Save text submission as a text file
                 await System.IO.File.WriteAllTextAsync(filePath, TextSubmission);
+
+                // Save to database
+                var submission = new submittedAssignment
+                {
+                    AssignmentId = assignmentId,
+                    StudentId = user.Id, // NOTE: This assumes user.Id can be parsed to int
+                    submissionTypeId = Assignment.SubmissionTypeId,
+                    filePath = $"/submissions/{assignmentId}/{fileName}",
+                    submissionDate = DateTime.Now,
+                    textSubmission = TextSubmission,
+                    grade = 0
+                };
+
+                _context.submittedAssignments.Add(submission);
+                await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Submission saved successfully!";
             }

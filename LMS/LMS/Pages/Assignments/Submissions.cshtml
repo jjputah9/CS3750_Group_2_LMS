@@ -1,0 +1,66 @@
+﻿@page "{assignmentId:int}"
+@model LMS.Pages.Assignments.SubmissionsModel
+
+@{
+    ViewData["Title"] = "Submissions";
+}
+
+<div class="container mt-4">
+    <h2>Submissions</h2>
+
+    @if (!Model.Submissions.Any())
+    {
+        <div class="alert alert-info">
+            No submissions yet.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Grade</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Submissions)
+                {
+                    <tr>
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                        <td>@item.SubmittedAt</td>
+                        <td>@item.Status</td>
+                        <td>@item.Grade</td>
+                        <td>
+                            @if (item.Status == "Graded")
+                            {
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   asp-page="/Assignments/GradeSubmissions"
+                                   asp-route-submissionId="@item.SubmissionId">
+                                    Edit Grade
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-sm btn-outline-primary"
+                                   asp-page="/Assignments/GradeSubmissions"
+                                   asp-route-submissionId="@item.SubmissionId">
+                                    Grade
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="mt-3">
+        <a class="btn btn-link px-0" asp-page="/Assignments/Index" asp-route-courseId="@Model.Assignment?.CourseId">← Back to Assignments</a>
+    </div>
+</div>

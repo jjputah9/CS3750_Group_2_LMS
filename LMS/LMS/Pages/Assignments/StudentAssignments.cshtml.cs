@@ -48,7 +48,7 @@ namespace LMS.Pages.Assignments
             if (user.UserType != "Student") return Forbid();
 
             var course = await _context.Course.AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == courseId); // Double check this line for errors
+                .FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null) return Forbid();
 
@@ -61,19 +61,13 @@ namespace LMS.Pages.Assignments
                 .OrderBy(a => a.DueDate)
                 .ToListAsync();
 
-            // Check which assignments have been submitted
-            foreach (var assignment in Assignment)
-            {
-                var submissionsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "submissions", assignment.AssignmentId.ToString());
-                if (Directory.Exists(submissionsFolder))
-                {
-                    var files = Directory.GetFiles(submissionsFolder, $"{user.Id}_{assignment.AssignmentId}_*");
-                    if (files.Any())
-                    {
-                        SubmittedAssignmentIds.Add(assignment.AssignmentId);
-                    }
-                }
-            }
+            // Check which assignments have been submitted by querying the database
+            var submittedAssignments = await _context.submittedAssignments
+                .Where(s => s.StudentId == user.Id)
+                .Select(s => s.AssignmentId)
+                .ToListAsync();
+
+            SubmittedAssignmentIds = new HashSet<int>(submittedAssignments);
 
             return Page();
         }
