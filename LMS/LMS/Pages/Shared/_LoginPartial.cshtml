@@ -4,35 +4,106 @@
 @inject UserManager<ApplicationUser> UserManager
 
 <head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script language="JavaScript" type="text/javascript" src="lib/bootstrap/dist/js/bootstrap.js"></script>
-<script>
-$(document).ready(function(){
-  $('[data-toggle="popover"]').popover({title: "Notifications", content: "New Assignment for CS 3750"});
-});
-</script>
+    <!-- jQuery & Bootstrap -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+
+    <!-- Font Awesome CDN for bell & X icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* Notification icon styles */
+        #notificationIcon {
+            font-size: 30px; /* bigger and visible */
+            color: #333333; /* black/dark gray */
+        }
+
+        #notificationBtn {
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        /* Popover styles */
+        .popover {
+            max-width: 250px;
+            font-size: 16px;
+            color: #333333;
+        }
+
+        .popover-header {
+            font-weight: bold;
+            font-size: 18px;
+            color: #000000;
+        }
+
+        .popover-body {
+            font-size: 16px;
+            color: #333333;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            var notificationShown = false;
+
+            $('#notificationBtn').click(function () {
+                if (!notificationShown) {
+                    // Show popover notification
+                    $(this).popover({
+                        html: true,
+                        trigger: 'manual',
+                        placement: 'bottom',
+                        title: 'Notifications',
+                        content: 'New Assignment for CS 3750'
+                    }).popover('show');
+
+                    // Switch icon to X (Font Awesome)
+                    $('#notificationIcon').removeClass('fa-bell').addClass('fa-xmark');
+                    notificationShown = true;
+                } else {
+                    // Hide popover and restore bell
+                    $(this).popover('hide');
+                    $('#notificationIcon').removeClass('fa-xmark').addClass('fa-bell');
+                    notificationShown = false;
+                }
+            });
+
+            // Click outside to hide popover and reset icon
+            $(document).click(function (e) {
+                var target = $(e.target);
+                if (!target.closest('#notificationBtn').length &&
+                    !target.closest('.popover').length &&
+                    notificationShown) {
+                    $('#notificationBtn').popover('hide');
+                    $('#notificationIcon').removeClass('fa-xmark').addClass('fa-bell');
+                    notificationShown = false;
+                }
+            });
+        });
+    </script>
 </head>
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-page="/Profile">Profile</a>
-    </li>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-page="/Profile">Profile</a>
+        </li>
 
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-page="/StudentAccount/Index">Account</a>
-    </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-page="/StudentAccount/Index">Account</a>
+        </li>
 
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-page="/Calendar/Index">Calendar</a>
-    </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-page="/Calendar/Index">Calendar</a>
+        </li>
 
         <li class="nav-item">
             <a class="nav-link text-dark" asp-page="/Charts/Index">Chart</a>
         </li>
 
-     @if (User.HasClaim("UserType", "Student"))
+        @if (User.HasClaim("UserType", "Student"))
         {
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-page="/Registrations/Create">Registration</a>
@@ -45,29 +116,28 @@ $(document).ready(function(){
             </li>
         }
 
+        <li class="nav-item">
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                <button type="submit" class="nav-link text-dark">Logout</button>
+            </form>
+        </li>
 
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-            <button  type="submit" class="nav-link text-dark">Logout</button>
-        </form>
-    </li>
-
-    @if (User.HasClaim("UserType", "Student"))
+        @if (User.HasClaim("UserType", "Student"))
         {
             <li class="nav-item">
-                <button type="button" class="btn" data-toggle="popover">
-                    <img src="/images/BellIcon.png" alt="Notifications" height="25" width="25"/>
+                <button id="notificationBtn" type="button" class="btn">
+                    <i id="notificationIcon" class="fa-solid fa-bell"></i>
                 </button>
             </li>
         }
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Sign Up</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Sign Up</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
 </ul>

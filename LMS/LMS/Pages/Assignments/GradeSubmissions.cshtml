@@ -1,0 +1,71 @@
+﻿@page "{submissionId:int}"
+@model LMS.Pages.Assignments.GradeSubmissionsModel
+@{
+    ViewData["Title"] = "Grade Submission";
+}
+
+<div class="container mt-3">
+    <div class="p-3 p-md-4 bg-light border rounded-3">
+        <h1>Grade Submission</h1>
+        <h3>@Model.Assignment?.Title</h3>
+        <p><strong>Student:</strong> @Model.Student?.fName @Model.Student?.lName</p>
+        <p><strong>Submitted:</strong> @Model.Submission?.submissionDate.ToString("MMM d, yyyy h:mm tt")</p>
+        <p><strong>Assignment Points:</strong> @Model.Assignment?.Points</p>
+    </div>
+
+    <div class="mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Submission Content</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.SubmissionTypeName == "Text Entry")
+                {
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Student's Answer:</label>
+                        <div class="border rounded p-3 bg-white" style="white-space: pre-wrap;">@Model.TextContent</div>
+                    </div>
+                }
+                else if (Model.SubmissionTypeName == "File Upload")
+                {
+                    var fileName = Model.Submission?.filePath?.Split('/').LastOrDefault() ?? 
+                                   Model.Submission?.filePath?.Split('\\').LastOrDefault() ?? 
+                                   "file";
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Submitted File:</label>
+                        <div>
+                            <a asp-page-handler="DownloadFile" 
+                               asp-route-submissionId="@Model.Submission.submittedAssignmentId" 
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-download"></i> Download @fileName
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <form method="post">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Enter Grade</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Grade" class="form-label">Grade (out of @Model.Assignment?.Points points)</label>
+                        <input asp-for="Grade" class="form-control" type="number" min="0" max="@Model.Assignment?.Points" />
+                        <span asp-validation-for="Grade" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-success">Save Grade</button>
+                    <a asp-page="/Assignments/Submissions" asp-route-assignmentId="@Model.Assignment?.AssignmentId" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

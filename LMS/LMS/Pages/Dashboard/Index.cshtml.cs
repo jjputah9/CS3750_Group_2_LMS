@@ -13,13 +13,16 @@ namespace LMS.Pages.Dashboard
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
+        public readonly IWebHostEnvironment _webHostEnvironment;
 
         public DashboardIndexModel(
             UserManager<ApplicationUser> userManager
-            , ApplicationDbContext context)
+            , ApplicationDbContext context,
+            IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // property that holds the current user

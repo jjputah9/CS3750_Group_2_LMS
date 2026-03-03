@@ -74,21 +74,26 @@
                 {
                     @foreach (var assignment in Model.Assignments)
                     {
-                        <div class="card mb-2 p-2">
-                            <div class="card-body p-2 text-end">
-                                <div>@assignment.Course?.DeptName @assignment.Course?.CourseNum</div>
-                                <div>@assignment.Title</div>
-                                <small class="text-muted">
-                                    @assignment.DueDate.ToString("MMM d 'at' hh:mm tt")
-                                </small>
-                                <br/>
-                                <a class="btn btn-sm btn-primary ms-1"
-                                    asp-page="/Assignments/AssignmentSubmit"
-                                    asp-route-assignmentId="@assignment.AssignmentId">
-                                    Submission
-                                </a>
+                        var filePath = System.IO.Path.Combine(Model._webHostEnvironment.WebRootPath, "submissions", assignment.AssignmentId.ToString());
+                        <!-- Only display assignments with no submission -->
+                        @if (!Directory.Exists(filePath) || 
+                            Directory.GetFiles(filePath, $"{Model.CurrentUser.Id}_{assignment.AssignmentId}_*").Any() == false){
+                            <div class="card mb-2 p-2">
+                                <div class="card-body p-2 text-end">
+                                    <div>@assignment.Course?.DeptName @assignment.Course?.CourseNum</div>
+                                    <div>@assignment.Title</div>
+                                    <small class="text-muted">
+                                        @assignment.DueDate.ToString("MMM d 'at' hh:mm tt")
+                                    </small>
+                                    <br/>
+                                    <a class="btn btn-sm btn-primary ms-1"
+                                        asp-page="/Assignments/AssignmentSubmit"
+                                        asp-route-assignmentId="@assignment.AssignmentId">
+                                        Submission
+                                    </a>
+                                </div>
                             </div>
-                        </div>
+                        }
                     }
                 }
                 else

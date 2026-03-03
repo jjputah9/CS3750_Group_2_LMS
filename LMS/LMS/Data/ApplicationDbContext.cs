@@ -26,6 +26,8 @@ namespace LMS.Data
 
         public DbSet<Assignment> Assignment { get; set; } = default!;
 
+        public DbSet<submittedAssignment> submittedAssignments { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

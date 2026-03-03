@@ -70,7 +70,30 @@ namespace LMS.Pages.StudentAccount
                 .ToListAsync();
         }
 
+<<<<<<< HEAD
         // ✅ FULL TUITION PAYMENT
+=======
+        public async Task SavePaymentRecord(string studentId, decimal amount, string paymentType, string stripeSessionId)
+        {
+            var payment = new Payment
+            {
+                StudentId = studentId,
+                Amount = amount,
+                PaymentType = paymentType,
+                StripeSessionId = stripeSessionId,
+                PaymentDate = DateTime.UtcNow,
+                Status = "Completed",
+                Notes = $"Payment processed via Stripe. Session: {stripeSessionId}"
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"✅ Payment saved: ${amount} for student {studentId}");
+        }
+
+        // Full payment endpoint
+>>>>>>> 857ac793ad41057cbdac8a3dcd0ada14ffe1e5ec
         public async Task<IActionResult> OnPostCreateCheckoutSessionAsync()
         {
             await LoadUserData();
