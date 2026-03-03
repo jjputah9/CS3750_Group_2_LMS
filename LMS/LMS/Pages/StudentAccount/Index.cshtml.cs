@@ -15,19 +15,13 @@ namespace LMS.Pages.StudentAccount
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<IndexModel> _logger;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            ApplicationDbContext context,
-            IConfiguration configuration,
-            ILogger<IndexModel> logger)
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _context = context;
-            _configuration = configuration;
-            _logger = logger;
         }
 
         public ApplicationUser CurrentUser { get; set; }
@@ -35,9 +29,6 @@ namespace LMS.Pages.StudentAccount
         public int TotalCredits { get; set; }
         public decimal Tuition { get; set; }
         public decimal TotalPaid { get; set; }
-        public string StripePublishableKey { get; set; }
-
-      
         public List<Payment> RecentPayments { get; set; } = new();
 
         [BindProperty]
@@ -51,13 +42,9 @@ namespace LMS.Pages.StudentAccount
         private async Task LoadUserData()
         {
             CurrentUser = await _userManager.GetUserAsync(User);
-            if (CurrentUser == null) return;
-
-            // Only for students
-            if (CurrentUser.UserType != "Student")
+            if (CurrentUser == null || CurrentUser.UserType != "Student")
                 return;
 
-            // Load courses
             RegisteredCourses = await _context.Registration
                 .Where(r => r.StudentID == CurrentUser.Id)
                 .Join(_context.Course,
@@ -66,57 +53,27 @@ namespace LMS.Pages.StudentAccount
                       (r, c) => c)
                 .ToListAsync();
 
-            // Sum total credits
             TotalCredits = RegisteredCourses.Sum(c => c.CreditHours);
 
-            // Total tuition = $100 per credit
-            var totalTuition = TotalCredits * 100;
+            decimal totalTuition = TotalCredits * 100; // $100 per credit
 
-            // Calculate total payments made
             TotalPaid = await _context.Payments
                 .Where(p => p.StudentId == CurrentUser.Id && p.Status == "Completed")
                 .SumAsync(p => p.Amount);
 
-            // Remaining balance = total tuition - payments made
             Tuition = totalTuition - TotalPaid;
 
-           
             RecentPayments = await _context.Payments
                 .Where(p => p.StudentId == CurrentUser.Id && p.Status == "Completed")
                 .OrderByDescending(p => p.PaymentDate)
                 .Take(5)
                 .ToListAsync();
-
-            // Get Stripe publishable key
-            StripePublishableKey = _configuration["pk_test_51SwPAbQeeHKH9xZ6cogbadiQKgppICfOhZGEg5Cw1aMSDsmjcZhgzcYNZU6qJi0UyeIsvZjBc9BPGVrMsUFhuhWn009dlx00Vg\r\n"];
         }
 
-        private async Task SavePaymentRecord(string studentId, decimal amount, string paymentType, string stripeSessionId)
-        {
-            var payment = new Payment
-            {
-                StudentId = studentId,
-                Amount = amount,
-                PaymentType = paymentType,
-                StripeSessionId = stripeSessionId,
-                PaymentDate = DateTime.UtcNow,
-                Status = "Completed",
-                Notes = $"Payment processed via Stripe. Session: {stripeSessionId}"
-            };
-
-            _context.Payments.Add(payment);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"✅ Payment saved: ${amount} for student {studentId}");
-        }
-
-        // Full payment endpoint
+        // ✅ FULL TUITION PAYMENT
         public async Task<IActionResult> OnPostCreateCheckoutSessionAsync()
         {
             await LoadUserData();
-
-            if (CurrentUser == null || CurrentUser.UserType != "Student")
-                return RedirectToPage("/Error");
 
             if (Tuition <= 0)
             {
@@ -124,58 +81,57 @@ namespace LMS.Pages.StudentAccount
                 return RedirectToPage();
             }
 
-            // Convert to cents (Stripe uses smallest currency unit)
-            var amountInCents = (long)(Tuition * 100);
+            long amountInCents = (long)(Tuition * 100);
+
+            StripeConfiguration.ApiKey = "sk_test_51SwPAQQe5XKdlTbWrbt1qkEWTNs0E9XmqJTf9Ou7IxvAxT0izVE6p9Ha9RYhNk5SXNqabHVLTpkyNrNocuh1Azuk00qFh3nka3";
 
             var options = new SessionCreateOptions
             {
-                PaymentMethodTypes = new List<string> { "card" },
                 LineItems = new List<SessionLineItemOptions>
                 {
                     new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            Currency = "usd",
                             UnitAmount = amountInCents,
+                            Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Tuition Payment",
-                                Description = $"Tuition for {TotalCredits} credits"
-                            }
+                                Name = "Tuition Payment"
+                            },
                         },
-                        Quantity = 1
-                    }
+                        Quantity = 1,
+                    },
                 },
                 Mode = "payment",
-               
-                SuccessUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Success?amount={Tuition}",
-                CancelUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Index",
-                CustomerEmail = CurrentUser.Email,
-                Metadata = new Dictionary<string, string>
-                {
-                    { "student_id", CurrentUser.Id },
-                    { "payment_type", "full_tuition" },
-                    { "amount", Tuition.ToString("F2") }
-                }
+                SuccessUrl = "https://localhost:5001/StudentAccount/Index",
+                CancelUrl = "https://localhost:5001/StudentAccount/Index",
             };
 
             var service = new SessionService();
-            Session session = await service.CreateAsync(options);
+            Session session = service.Create(options);
 
-            // Save payment record
-            await SavePaymentRecord(CurrentUser.Id, Tuition, "full_tuition", session.Id);
+            // ✅ SAVE PAYMENT TO DATABASE
+            var payment = new Payment
+            {
+                StudentId = CurrentUser.Id,
+                Amount = Tuition,
+                PaymentType = "Full Tuition",
+                StripeSessionId = session.Id,
+                PaymentDate = DateTime.UtcNow,
+                Status = "Completed"
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
 
             return Redirect(session.Url);
         }
 
-        // Custom payment
+        // ✅ PARTIAL / CUSTOM PAYMENT
         public async Task<IActionResult> OnPostCreateCustomCheckoutSessionAsync()
         {
             await LoadUserData();
-
-            if (CurrentUser == null || CurrentUser.UserType != "Student")
-                return RedirectToPage("/Error");
 
             if (PaymentAmount <= 0 || PaymentAmount > Tuition)
             {
@@ -183,47 +139,49 @@ namespace LMS.Pages.StudentAccount
                 return RedirectToPage();
             }
 
-            // Convert to cents
-            var amountInCents = (long)(PaymentAmount * 100);
+            long amountInCents = (long)(PaymentAmount * 100);
+
+            StripeConfiguration.ApiKey = "sk_test_51SwPAQQe5XKdlTbWrbt1qkEWTNs0E9XmqJTf9Ou7IxvAxT0izVE6p9Ha9RYhNk5SXNqabHVLTpkyNrNocuh1Azuk00qFh3nka3";
 
             var options = new SessionCreateOptions
             {
-                PaymentMethodTypes = new List<string> { "card" },
                 LineItems = new List<SessionLineItemOptions>
                 {
                     new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            Currency = "usd",
                             UnitAmount = amountInCents,
+                            Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "Partial Tuition Payment",
-                                Description = $"Payment of ${PaymentAmount:F2} towards tuition"
-                            }
+                                Name = "Tuition Payment"
+                            },
                         },
-                        Quantity = 1
-                    }
+                        Quantity = 1,
+                    },
                 },
                 Mode = "payment",
-             
-                SuccessUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Success?amount={PaymentAmount}",
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Success",
                 CancelUrl = $"{Request.Scheme}://{Request.Host}/StudentAccount/Index",
-                CustomerEmail = CurrentUser.Email,
-                Metadata = new Dictionary<string, string>
-                {
-                    { "student_id", CurrentUser.Id },
-                    { "payment_type", "partial_tuition" },
-                    { "amount", PaymentAmount.ToString("F2") }
-                }
             };
 
             var service = new SessionService();
-            Session session = await service.CreateAsync(options);
+            Session session = service.Create(options);
 
-            // Save payment record
-            await SavePaymentRecord(CurrentUser.Id, PaymentAmount, "partial_tuition", session.Id);
+            // ✅ SAVE PAYMENT TO DATABASE
+            var payment = new Payment
+            {
+                StudentId = CurrentUser.Id,
+                Amount = PaymentAmount,
+                PaymentType = "Partial Tuition",
+                StripeSessionId = session.Id,
+                PaymentDate = DateTime.UtcNow,
+                Status = "Completed"
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
 
             return Redirect(session.Url);
         }

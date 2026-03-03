@@ -6,8 +6,8 @@ using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 // Instead of reading from appsettings.json
-StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("sk_test_51SwPAbQeeHKH9xZ6eSHc7lrlZO54BpiBraW4BfJSNkLwXKKrPdTEfyMAfDFGhSLRZXLK4ZUKRGc8MQkey5SSrCy200e1DbSdEb")
-    ?? builder.Configuration["Stripe:SecretKey"];
+StripeConfiguration.ApiKey = "sk_test_51SwPAQQe5XKdlTbWrbt1qkEWTNs0E9XmqJTf9Ou7IxvAxT0izVE6p9Ha9RYhNk5SXNqabHVLTpkyNrNocuh1Azuk00qFh3nka3";
+
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

@@ -1,10 +1,10 @@
-using LMS.Data;
-using LMS.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using LMS.Data;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace LMS.Pages.StudentAccount
 {
@@ -13,39 +13,30 @@ namespace LMS.Pages.StudentAccount
     {
         private readonly ApplicationDbContext _context;
 
-        [BindProperty(SupportsGet = true)]
-        public decimal Amount { get; set; }
-
-        public decimal RemainingBalance { get; set; }
-
         public SuccessModel(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        public decimal Amount { get; set; }
+
         public async Task OnGetAsync()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return;
+            var studentId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Get student's courses
-            var registeredCourses = await _context.Registration
-                .Where(r => r.StudentID == userId)
-                .Join(_context.Course,
-                      r => r.CourseID,
-                      c => c.Id,
-                      (r, c) => c)
-                .ToListAsync();
+            if (studentId == null)
+                return;
 
-            var totalCredits = registeredCourses.Sum(c => c.CreditHours);
-            var totalTuition = totalCredits * 100;
+            // Get the latest completed payment
+            var latestPayment = await _context.Payments
+                .Where(p => p.StudentId == studentId && p.Status == "Completed")
+                .OrderByDescending(p => p.PaymentDate)
+                .FirstOrDefaultAsync();
 
-            // Get total payments
-            var totalPaid = await _context.Payments
-                .Where(p => p.StudentId == userId && p.Status == "Completed")
-                .SumAsync(p => p.Amount);
-
-            RemainingBalance = totalTuition - totalPaid;
+            if (latestPayment != null)
+            {
+                Amount = latestPayment.Amount;
+            }
         }
     }
 }
