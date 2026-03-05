@@ -112,6 +112,9 @@ namespace LMS.Pages.Registrations
                 await _context.SaveChangesAsync();
             }
 
+            // clear cache (force dashboard to querey)
+            HttpContext.Session.Remove("UserCourses");
+
             return RedirectToPage("/Registrations/Create");
         }
 

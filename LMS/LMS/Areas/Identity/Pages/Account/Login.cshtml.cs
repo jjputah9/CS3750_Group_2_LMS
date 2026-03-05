@@ -136,6 +136,9 @@ namespace LMS.Areas.Identity.Pages.Account
                         await _signInManager.UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("UserType", user.UserType ?? ""));
                     }
 
+                    // clear course cache (force dashboard to querey)
+                    HttpContext.Session.Remove("UserCourses");
+
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
