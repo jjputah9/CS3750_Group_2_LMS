@@ -43,6 +43,17 @@ namespace LMS.Pages.Dashboard
             if (CurrentUser == null)
                 return;
 
+            // check cache for courses
+            var cachedCourses = HttpContext.Session.GetString("UserCourses");
+
+            // check if cache is not null/empty
+            if (!string.IsNullOrEmpty(cachedCourses))
+            {
+                Courses = System.Text.Json.JsonSerializer.Deserialize<List<Course>>(cachedCourses)!;
+                return;
+            }
+
+            // if cache is null, DB hit required
             // show courses the student is registered for or courses the instructor is responsible for
             if (CurrentUser.UserType == "Student")
             {
@@ -75,6 +86,12 @@ namespace LMS.Pages.Dashboard
                     .Where(r => r.InstructorEmail == CurrentUser.Email)
                     .ToListAsync();
             }
+
+            // store new course data in cache
+            HttpContext.Session.SetString(
+                "UserCourses",
+                System.Text.Json.JsonSerializer.Serialize(Courses)
+            );
 
         }
 
