@@ -8,16 +8,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LMS.Data;
 using LMS.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace LMS.Pages.Courses
 {
     public class EditModel : PageModel
     {
         private readonly LMS.Data.ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public EditModel(LMS.Data.ApplicationDbContext context)
+        public EditModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [BindProperty]
@@ -31,6 +34,10 @@ namespace LMS.Pages.Courses
             {
                 return NotFound();
             }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+            if (user.UserType != "Instructor") return Forbid();
 
             var course =  await _context.Course.FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)

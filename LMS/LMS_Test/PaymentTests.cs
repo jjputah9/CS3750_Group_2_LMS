@@ -34,9 +34,7 @@ public class PaymentTests
         // create the pageModel
         var pageModel = new IndexModel(
             mockUserManager.Object,
-            context,
-            mockConfig.Object, 
-            mockLogger.Object
+            context
         );
 
         await pageModel.SavePaymentRecord(

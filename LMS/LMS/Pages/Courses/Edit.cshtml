@@ -8,7 +8,6 @@
     ViewData["Title"] = "Edit";
 }
 
-@if (SignInManager.IsSignedIn(User)){
 <h1>Edit</h1>
 
 <h4>Course (Instructor: @Model.Course.InstructorEmail)</h4>
@@ -105,13 +104,6 @@
 <div>
     <a asp-page="./Index">Back to List</a>
 </div>
-
-}
-else{
-    <div class="text-center">
-        <p>Please <a href="/Identity/Account/Login">sign in</a> to edit courses.</p>
-    </div>
-}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
