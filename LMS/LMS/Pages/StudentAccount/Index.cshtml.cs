@@ -18,7 +18,9 @@ namespace LMS.Pages.StudentAccount
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IConfiguration @object,
+            ILogger<IndexModel> object1)
         {
             _userManager = userManager;
             _context = context;
