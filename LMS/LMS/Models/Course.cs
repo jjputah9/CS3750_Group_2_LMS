@@ -11,6 +11,9 @@ public class Course
     public string? InstructorEmail {get; set;} //Foreign key for the course instructor
 
     [Required]
+    public string? InstructorName {get; set;}
+
+    [Required]
     [StringLength(5)]
     public string? DeptName {get; set;} //Department Name
 
