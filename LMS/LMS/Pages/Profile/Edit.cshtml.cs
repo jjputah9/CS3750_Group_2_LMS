@@ -206,7 +206,7 @@ namespace LMS.Pages.Profile
 
         private string GetUserId()
         {
-            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "demo-user-123";
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
         private async Task LoadProfileData()
