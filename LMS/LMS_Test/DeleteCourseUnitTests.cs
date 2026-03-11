@@ -7,8 +7,10 @@ using LMS.Pages.Courses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace LMS.Tests
 {
@@ -24,12 +26,20 @@ namespace LMS.Tests
             return new ApplicationDbContext(options);
         }
 
-        private ClaimsPrincipal FakeInstructor(string email = "instructor@test.com")
+        private UserManager<ApplicationUser> FakeInstructor(string email = "instructor@test.com")
         {
-            return new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.Name, email)
-            }, "TestAuth"));
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        var uManager = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+
+        uManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>()))
+        .ReturnsAsync(new ApplicationUser{});
+        uManager.Setup(userManager => userManager.IsInRoleAsync(It.IsAny<ApplicationUser>(), "Instructor"))
+        .ReturnsAsync(true);
+        uManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+        .ReturnsAsync(new ApplicationUser{UserType="Instructor", Email=email});
+
+        return uManager.Object;
         }
 
         [TestMethod]
@@ -52,14 +62,19 @@ namespace LMS.Tests
             context.Course.Add(course);
             await context.SaveChangesAsync();
 
-            var pageModel = new DeleteModel(context)
+            var user = FakeInstructor();
+
+            var pageModel = new DeleteModel(context, user)
             {
                 Course = course,
                 PageContext = new PageContext
                 {
                     HttpContext = new DefaultHttpContext
                     {
-                        User = FakeInstructor()
+                        User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                        {
+                            new Claim(ClaimTypes.Name, "instructor@test.com")
+                        }, "TestAuth"))
                     }
                 }
             };
@@ -94,14 +109,16 @@ namespace LMS.Tests
             context.Course.Add(course);
             await context.SaveChangesAsync();
 
-            var pageModel = new DeleteModel(context)
+            var user = FakeInstructor();
+
+            var pageModel = new DeleteModel(context, user)
             {
                 Course = course,
                 PageContext = new PageContext
                 {
                     HttpContext = new DefaultHttpContext
                     {
-                        User = FakeInstructor("instructor@test.com") // different instructor
+                        
                     }
                 }
             };
@@ -133,7 +150,9 @@ namespace LMS.Tests
             context.Course.Add(course);
             await context.SaveChangesAsync();
 
-            var pageModel = new DeleteModel(context)
+            var uManager = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+
+            var pageModel = new DeleteModel(context, uManager.Object)
             {
                 Course = course,
                 PageContext = new PageContext

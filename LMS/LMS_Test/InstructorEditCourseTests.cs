@@ -1,6 +1,7 @@
 ﻿using LMS.Data;
 using LMS.Models;
 using LMS.Pages.Courses;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Moq;
+using System.Security.Claims;
 
 namespace LMS_Test
 {
@@ -32,6 +35,22 @@ namespace LMS_Test
             return await read.Course.AsNoTracking().FirstAsync(c => c.Id == id);
         }
 
+        private UserManager<ApplicationUser> FakeInstructor()
+        {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        var uManager = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+
+        uManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>()))
+        .ReturnsAsync(new ApplicationUser{});
+        uManager.Setup(userManager => userManager.IsInRoleAsync(It.IsAny<ApplicationUser>(), "Instructor"))
+        .ReturnsAsync(true);
+        uManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+        .ReturnsAsync(new ApplicationUser{UserType="Instructor"});
+
+        return uManager.Object;
+        }
+
         // ----------------------------
         // 1) Happy path: valid edit
         // ----------------------------
@@ -40,6 +59,7 @@ namespace LMS_Test
         {
             var dbName = Guid.NewGuid().ToString();
             var options = BuildOptions(dbName);
+            var user = FakeInstructor();
 
             await SeedCourseAsync(options, new Course
             {
@@ -58,7 +78,7 @@ namespace LMS_Test
 
             using (var act = new ApplicationDbContext(options))
             {
-                var page = new EditModel(act)
+                var page = new EditModel(act, user)
                 {
                     Course = new Course
                     {
@@ -97,6 +117,7 @@ namespace LMS_Test
         {
             var dbName = Guid.NewGuid().ToString();
             var options = BuildOptions(dbName);
+            var user = FakeInstructor();
 
             await SeedCourseAsync(options, new Course
             {
@@ -115,7 +136,7 @@ namespace LMS_Test
 
             using (var act = new ApplicationDbContext(options))
             {
-                var page = new EditModel(act)
+                var page = new EditModel(act, user)
                 {
                     Course = new Course
                     {
@@ -151,6 +172,7 @@ namespace LMS_Test
         {
             var dbName = Guid.NewGuid().ToString();
             var options = BuildOptions(dbName);
+            var user = FakeInstructor();
 
             await SeedCourseAsync(options, new Course
             {
@@ -169,7 +191,7 @@ namespace LMS_Test
 
             using (var act = new ApplicationDbContext(options))
             {
-                var page = new EditModel(act)
+                var page = new EditModel(act, user)
                 {
                     Course = new Course
                     {
@@ -208,9 +230,10 @@ namespace LMS_Test
         {
             var dbName = Guid.NewGuid().ToString();
             var options = BuildOptions(dbName);
+            var user = FakeInstructor();
 
             using var context = new ApplicationDbContext(options);
-            var page = new EditModel(context);
+            var page = new EditModel(context, user);
 
             // Remove/adjust if your method signature differs
             var result = await page.OnGetAsync(null);
@@ -226,9 +249,10 @@ namespace LMS_Test
         {
             var dbName = Guid.NewGuid().ToString();
             var options = BuildOptions(dbName);
+            var user = FakeInstructor();
 
             using var context = new ApplicationDbContext(options);
-            var page = new EditModel(context);
+            var page = new EditModel(context, user);
 
             var result = await page.OnGetAsync(999999);
 
@@ -243,6 +267,7 @@ namespace LMS_Test
         {
             var dbName = Guid.NewGuid().ToString();
             var options = BuildOptions(dbName);
+            var user = FakeInstructor();
 
             await SeedCourseAsync(options, new Course
             {
@@ -261,7 +286,7 @@ namespace LMS_Test
 
             using (var act = new ApplicationDbContext(options))
             {
-                var page = new EditModel(act)
+                var page = new EditModel(act, user)
                 {
                     Course = new Course
                     {

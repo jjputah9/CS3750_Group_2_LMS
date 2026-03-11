@@ -88,6 +88,8 @@ public class SearchBarUnitTests
         .ReturnsAsync(new ApplicationUser{});
         uManager.Setup(userManager => userManager.IsInRoleAsync(It.IsAny<ApplicationUser>(), "Student"))
         .ReturnsAsync(true);
+        uManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+        .ReturnsAsync(new ApplicationUser{UserType="Student"});
         
         return new CreateModel(uManager.Object, context);
     }
