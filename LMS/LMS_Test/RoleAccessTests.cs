@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
@@ -40,6 +41,8 @@ public class RoleAccessTests
         .ReturnsAsync(new ApplicationUser{});
         uManager.Setup(userManager => userManager.IsInRoleAsync(It.IsAny<ApplicationUser>(), role))
         .ReturnsAsync(true);
+        uManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+        .ReturnsAsync(new ApplicationUser{UserType=role});
 
         return uManager.Object;
     }
@@ -76,24 +79,20 @@ public class RoleAccessTests
     {
         //Arrange
         var context = GetContext();
+        var user = GetUserManager("Student");
         
-        LMS.Pages.Courses.CreateModel model = new LMS.Pages.Courses.CreateModel(context);
+        LMS.Pages.Courses.CreateModel model = new LMS.Pages.Courses.CreateModel(context, user);
 
-        model.PageContext = new PageContext(){
+        model.PageContext = new PageContext()
+        {
             HttpContext = new DefaultHttpContext()
             {
-                User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, "student@test.com"),
-                    new Claim(ClaimTypes.Role, "Student")
-                }
-                , "TestAuth")
-                )
+                Session = new Mock<ISession>().Object
             }
         };
 
         //Attempt to access 
-        var receivedPage = model.OnGet();
+        var receivedPage = model.OnGetAsync().Result;
 
         //Assert that the attempt returned a forbidden result
         Assert.IsInstanceOfType(receivedPage, typeof(ForbidResult));
@@ -107,9 +106,10 @@ public class RoleAccessTests
     {
         //Arrange
         var context = GetContext();
+        var user = GetUserManager("Student");
         SetupCourses(context);
         
-        LMS.Pages.Courses.EditModel model = new LMS.Pages.Courses.EditModel(context);
+        LMS.Pages.Courses.EditModel model = new LMS.Pages.Courses.EditModel(context, user);
 
         model.PageContext = new PageContext(){
             HttpContext = new DefaultHttpContext()
@@ -139,9 +139,10 @@ public class RoleAccessTests
     {
         //Arrange
         var context = GetContext();
+        var user = GetUserManager("Student");
         SetupCourses(context);
         
-        LMS.Pages.Courses.DeleteModel model = new LMS.Pages.Courses.DeleteModel(context);
+        LMS.Pages.Courses.DeleteModel model = new LMS.Pages.Courses.DeleteModel(context, user);
 
         model.PageContext = new PageContext(){
             HttpContext = new DefaultHttpContext()
@@ -177,7 +178,7 @@ public class RoleAccessTests
         LMS.Pages.Registrations.CreateModel model = new LMS.Pages.Registrations.CreateModel(userManager, context);
 
         //Attempt to access 
-        var receivedPage = model.OnGetAsync();
+        var receivedPage = model.OnGetAsync().Result;
 
         //Assert that the attempt returned a forbidden result
         Assert.IsInstanceOfType(receivedPage, typeof(ForbidResult));
@@ -198,16 +199,17 @@ public class RoleAccessTests
         LMS.Pages.Assignments.CreateModel model = new LMS.Pages.Assignments.CreateModel(context, userManager);
 
         int courseId = context.Course.First().Id;
+        var courseIdBytes = BitConverter.GetBytes(courseId);
+        var session = new Mock<ISession>();
+        session.Setup(session => session.TryGetValue("ActiveCourseId", out courseIdBytes)).Returns(true);
 
         model.PageContext = new PageContext()
         {
             HttpContext = new DefaultHttpContext()
             {
-                Session = new Mock<ISession>().Object
+                Session = session.Object
             }
         };
-
-        model.HttpContext.Session.SetInt32("ActiveCourseId", courseId);
 
         //Attempt to access 
         var receivedPage = model.OnGetAsync(courseId).Result;
@@ -230,16 +232,17 @@ public class RoleAccessTests
         LMS.Pages.Assignments.EditModel model = new LMS.Pages.Assignments.EditModel(context, userManager);
 
         int courseId = context.Course.First().Id;
+        var courseIdBytes = BitConverter.GetBytes(courseId);
+        var session = new Mock<ISession>();
+        session.Setup(session => session.TryGetValue("ActiveCourseId", out courseIdBytes)).Returns(true);
 
         model.PageContext = new PageContext()
         {
             HttpContext = new DefaultHttpContext()
             {
-                Session = new Mock<ISession>().Object
+                Session = session.Object
             }
         };
-
-        model.HttpContext.Session.SetInt32("ActiveCourseId", courseId);
 
         //Attempt to access 
         var receivedPage = model.OnGetAsync(courseId).Result;
@@ -262,19 +265,20 @@ public class RoleAccessTests
         LMS.Pages.Assignments.DeleteModel model = new LMS.Pages.Assignments.DeleteModel(context, userManager);
 
         int courseId = context.Course.First().Id;
+        var courseIdBytes = BitConverter.GetBytes(courseId);
+        var session = new Mock<ISession>();
+        session.Setup(session => session.TryGetValue("ActiveCourseId", out courseIdBytes)).Returns(true);
 
         model.PageContext = new PageContext()
         {
             HttpContext = new DefaultHttpContext()
             {
-                Session = new Mock<ISession>().Object
+                Session = session.Object
             }
         };
 
-        model.HttpContext.Session.SetInt32("ActiveCourseId", courseId);
-
         //Attempt to access 
-        var receivedPage = model.OnGetAsync(context.Course.First().Id).Result;
+        var receivedPage = model.OnGetAsync(courseId).Result;
 
         //Assert that the attempt returned a forbidden result
         Assert.IsInstanceOfType(receivedPage, typeof(ForbidResult));

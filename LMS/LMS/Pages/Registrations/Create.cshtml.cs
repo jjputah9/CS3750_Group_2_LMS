@@ -48,9 +48,11 @@ namespace LMS.Pages.Registrations
         public SelectList? CreditList { get; set; }
 
         // GET handler
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             CurrentUser = await _userManager.GetUserAsync(User);
+            if (CurrentUser == null) return Challenge();
+            if (CurrentUser.UserType != "Student") return Forbid();
 
             // Start query for courses
             IQueryable<Course> courseQuery = _context.Course;
@@ -91,6 +93,8 @@ namespace LMS.Pages.Registrations
                     .Select(c => c.CreditHours)
                     .Distinct()
                     .ToListAsync());
+
+            return Page();
         }
 
         // POST handler for Add/Drop courses

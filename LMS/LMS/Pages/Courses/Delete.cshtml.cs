@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using LMS.Data;
 using LMS.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace LMS.Pages.Courses
 {
     public class DeleteModel : PageModel
     {
         private readonly LMS.Data.ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DeleteModel(LMS.Data.ApplicationDbContext context)
+        public DeleteModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [BindProperty]
@@ -28,6 +31,10 @@ namespace LMS.Pages.Courses
             {
                 return NotFound();
             }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+            if (user.UserType != "Instructor") return Forbid();
 
             var course = await _context.Course.FirstOrDefaultAsync(m => m.Id == id);
 
@@ -60,8 +67,10 @@ namespace LMS.Pages.Courses
                 return Forbid(); // blocks users not logged in
             }
 
+            var user = await _userManager.GetUserAsync(User);
+
             // 2️⃣ Only the instructor who owns the course can delete it
-            if (course.InstructorEmail != User.Identity?.Name)
+            if (course.InstructorEmail != user?.Email)
             {
                 return Forbid(); // blocks other instructors
             }

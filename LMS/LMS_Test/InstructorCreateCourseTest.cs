@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+
+using Microsoft.AspNetCore.Identity;
 
 namespace LMS.Tests
 {
@@ -24,12 +27,20 @@ namespace LMS.Tests
             return new ApplicationDbContext(options);
         }
 
-        private ClaimsPrincipal FakeInstructor()
+        private UserManager<ApplicationUser> FakeInstructor()
         {
-            return new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.Name, "instructor@test.com")
-            }, "TestAuth"));
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        var uManager = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+
+        uManager.Setup(userManager => userManager.FindByIdAsync(It.IsAny<string>()))
+        .ReturnsAsync(new ApplicationUser{});
+        uManager.Setup(userManager => userManager.IsInRoleAsync(It.IsAny<ApplicationUser>(), "Instructor"))
+        .ReturnsAsync(true);
+        uManager.Setup(userManager => userManager.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+        .ReturnsAsync(new ApplicationUser{UserType="Instructor"});
+
+        return uManager.Object;
         }
 
         [TestMethod]
@@ -37,13 +48,17 @@ namespace LMS.Tests
         {
             // Arrange
             var context = GetTestContext();
-            var pageModel = new CreateModel(context);
+            var user = FakeInstructor();
+            var pageModel = new CreateModel(context, user);
 
             pageModel.PageContext = new PageContext
             {
                 HttpContext = new DefaultHttpContext
                 {
-                    User = FakeInstructor()
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                        new Claim(ClaimTypes.Name, "instructor@test.com")
+                    }, "TestAuth"))
                 }
             };
 
@@ -59,7 +74,6 @@ namespace LMS.Tests
                 StartTime = DateTime.Today.AddHours(9),
                 EndTime = DateTime.Today.AddHours(10)
             };
-
 
             // Act
             IActionResult result = await pageModel.OnPostAsync();
@@ -79,13 +93,17 @@ namespace LMS.Tests
         public async Task Create_Fails_When_Title_Missing()
         {
             var context = GetTestContext();
-            var pageModel = new CreateModel(context);
+            var user = FakeInstructor();
+            var pageModel = new CreateModel(context, user);
 
             pageModel.PageContext = new PageContext
             {
                 HttpContext = new DefaultHttpContext
                 {
-                    User = FakeInstructor()
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                        new Claim(ClaimTypes.Name, "instructor@test.com")
+                    }, "TestAuth"))
                 }
             };
 
@@ -113,13 +131,17 @@ namespace LMS.Tests
         public async Task Instructor_Email_Is_Set_Automatically()
         {
             var context = GetTestContext();
-            var pageModel = new CreateModel(context);
+            var user = FakeInstructor();
+            var pageModel = new CreateModel(context, user);
 
             pageModel.PageContext = new PageContext
             {
                 HttpContext = new DefaultHttpContext
                 {
-                    User = FakeInstructor()
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                        new Claim(ClaimTypes.Name, "instructor@test.com")
+                    }, "TestAuth"))
                 }
             };
 
@@ -146,11 +168,12 @@ namespace LMS.Tests
         public async Task Create_Fails_When_Not_Logged_In()
         {
             var context = GetTestContext();
-            var pageModel = new CreateModel(context);
+            var user = FakeInstructor();
+            var pageModel = new CreateModel(context, user);
 
             pageModel.PageContext = new PageContext
             {
-                HttpContext = new DefaultHttpContext() // no user
+                HttpContext = new DefaultHttpContext()
             };
 
             pageModel.Course = new Course
@@ -175,13 +198,17 @@ namespace LMS.Tests
         public async Task Course_Data_Saved_Correctly()
         {
             var context = GetTestContext();
-            var pageModel = new CreateModel(context);
+            var user = FakeInstructor();
+            var pageModel = new CreateModel(context, user);
 
             pageModel.PageContext = new PageContext
             {
                 HttpContext = new DefaultHttpContext
                 {
-                    User = FakeInstructor()
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                    {
+                        new Claim(ClaimTypes.Name, "instructor@test.com")
+                    }, "TestAuth"))
                 }
             };
 
