@@ -30,15 +30,19 @@ namespace LMS.Pages.Courses
             if (user == null) return Challenge();
             if (user.UserType != "Instructor") return Forbid();
 
-            CurrentInstructorName = user.lName + ", " + user.fName;
-
             return Page();
         }
 
         [BindProperty]
         public Course Course { get; set; } = default!;
 
-        public string CurrentInstructorName {get; set;} = "";
+        public async Task<string> GetCurrentInstructorName()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return "";
+
+            return user.lName + ", " + user.fName;
+        }
 
         public string MeetDayWarning { get; set; } = "";
 
@@ -66,7 +70,7 @@ namespace LMS.Pages.Courses
             }
 
             Course.InstructorEmail = User.Identity?.Name;
-            Course.InstructorName = CurrentInstructorName;
+            Course.InstructorName = GetCurrentInstructorName().Result;
 
             _context.Course.Add(Course);
             await _context.SaveChangesAsync();
