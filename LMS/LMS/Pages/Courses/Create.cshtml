@@ -11,13 +11,14 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <h4>Add Course for @User.Identity?.Name</h4>
+    <h4>Add Course for @Model.GetCurrentInstructorName().Result</h4>
     <hr />
     <div class="row">
         <div class="col-md-4">
             <form method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Course.InstructorEmail" value="placeholder" id="Course_InstructorEmail" />
+                <input type="hidden" asp-for="Course.InstructorName" value="placeholder" id="Course_InstructorEmail" />
 
                 <div class="form-group">
                     <span class="text-danger">*</span>
