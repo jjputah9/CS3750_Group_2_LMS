@@ -37,6 +37,17 @@
                                         <p class="card-text">@course.Location</p>
                                         <p class="card-text">@course.StartTime.ToString("h:mm tt") - @course.EndTime.ToString("h:mm tt") @FormatMeetDays(course.MeetDays)</p>
 
+                                        @if (Model.CourseGrades.ContainsKey(course.Id))
+                                        {
+                                            var grade = Model.CourseGrades[course.Id];
+                                            <div class="mb-2">
+                                                <strong>Current Grade:</strong>
+                                                <span class="badge @GetGradeBadgeClass(grade.LetterGrade)">
+                                                    @grade.LetterGrade (@grade.Percentage.ToString("F1"))%
+                                                </span>
+                                            </div>
+                                        }
+
                                         <div class="mt-auto">
                                             <a class="btn btn-primary w-100"
                                                asp-page="/Dashboard/Index"
@@ -173,6 +184,19 @@
         }
 
         return string.Join("/", result);
+    }
+
+    string GetGradeBadgeClass(string letterGrade)
+    {
+        return letterGrade switch
+        {
+            "A" or "A-" => "bg-success",
+            "B+" or "B" or "B-" => "bg-info",
+            "C+" or "C" or "C-" => "bg-warning",
+            "D+" or "D" or "D-" => "bg-danger",
+            "F" => "bg-danger",
+            _ => "bg-secondary"
+        };
     }
 }
 

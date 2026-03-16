@@ -34,6 +34,9 @@ namespace LMS.Pages.Dashboard
         // Get assignments for the selected course
         public List<Assignment> Assignments { get; set; } = new();
 
+        // Dictionary to store course grades: CourseId -> (Percentage, LetterGrade)
+        public Dictionary<int, (double Percentage, string LetterGrade)> CourseGrades { get; set; } = new();
+
         // Fetch the user on GET request
         public async Task OnGetAsync()
         {
@@ -50,6 +53,12 @@ namespace LMS.Pages.Dashboard
             if (!string.IsNullOrEmpty(cachedCourses))
             {
                 Courses = System.Text.Json.JsonSerializer.Deserialize<List<Course>>(cachedCourses)!;
+                
+                // Still need to calculate grades even with cached courses
+                if (CurrentUser.UserType == "Student")
+                {
+                    await CalculateCourseGrades();
+                }
                 return;
             }
 
@@ -65,6 +74,9 @@ namespace LMS.Pages.Dashboard
                           c => c.Id,
                           (r, c) => c)
                     .ToListAsync();
+
+                // Calculate grades for each course
+                await CalculateCourseGrades();
 
                 // if student, also get assignments for registered courses
                 Assignments = await _context.Registration
@@ -93,6 +105,60 @@ namespace LMS.Pages.Dashboard
                 System.Text.Json.JsonSerializer.Serialize(Courses)
             );
 
+        }
+
+        private async Task CalculateCourseGrades()
+        {
+            if (CurrentUser == null) return;
+
+            foreach (var course in Courses)
+            {
+                // Get all assignments for this course
+                var assignments = await _context.Assignment
+                    .Where(a => a.CourseId == course.Id)
+                    .ToListAsync();
+
+                // Calculate total possible points
+                int totalPossiblePoints = assignments.Sum(a => a.Points);
+
+                if (totalPossiblePoints == 0)
+                {
+                    CourseGrades[course.Id] = (0, "N/A");
+                    continue;
+                }
+
+                // Get student's submissions and sum their grades
+                var submissions = await _context.submittedAssignments
+                    .Where(s => s.StudentId == CurrentUser.Id && 
+                                assignments.Select(a => a.AssignmentId).Contains(s.AssignmentId))
+                    .ToListAsync();
+
+                int earnedPoints = submissions.Sum(s => s.grade);
+
+                // Calculate percentage
+                double percentage = (double)earnedPoints / totalPossiblePoints * 100;
+
+                // Determine letter grade
+                string letterGrade = GetLetterGrade(percentage);
+
+                CourseGrades[course.Id] = (percentage, letterGrade);
+            }
+        }
+
+        private string GetLetterGrade(double percentage)
+        {
+            if (percentage >= 93) return "A";
+            if (percentage >= 90) return "A-";
+            if (percentage >= 87) return "B+";
+            if (percentage >= 83) return "B";
+            if (percentage >= 80) return "B-";
+            if (percentage >= 77) return "C+";
+            if (percentage >= 73) return "C";
+            if (percentage >= 70) return "C-";
+            if (percentage >= 67) return "D+";
+            if (percentage >= 63) return "D";
+            if (percentage >= 60) return "D-";
+            return "F";
         }
 
         public async Task<IActionResult> OnGetGoToAssignmentsAsync(int courseId)
