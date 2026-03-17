@@ -193,7 +193,7 @@ namespace LMS.Pages.Profile
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Profile saved successfully!";
-                return RedirectToPage("/Profile");
+                return RedirectToPage("Index");
             }
             catch (Exception ex)
             {

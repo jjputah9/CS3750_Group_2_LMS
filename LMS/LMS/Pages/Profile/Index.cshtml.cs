@@ -13,8 +13,6 @@ namespace LMS.Pages.Profile
     public class ProfileModel : PageModel
     {
         public UserProfile? UserProfile { get; set; }
-        public string FullName { get; set; }
-        public string Initials { get; set; }
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
@@ -47,19 +45,22 @@ namespace LMS.Pages.Profile
             UserProfile = await _context.UserProfiles
                 .FirstOrDefaultAsync(p => p.UserId == CurrentUser.Id);
 
-            if (UserProfile != null)
-            {
-                FullName = UserProfile.FullName;
-                Initials = UserProfile.Initials;
-            }
-            else
+            if (UserProfile == null)
             {
                 // user profile not found, create a default one based on the user's name
                 var firstName = CurrentUser.fName ?? "Unknown";
                 var lastName = CurrentUser.lName ?? "User";
-                FullName = $"{firstName} {lastName}";
-                Initials = GetInitials(firstName, lastName);
 
+                UserProfile = new UserProfile
+                {
+                    UserId = CurrentUser.Id,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    BirthDate = CurrentUser.DOB
+                };
+
+                _context.UserProfiles.Add(UserProfile);
+                await _context.SaveChangesAsync();
             }
 
         }
