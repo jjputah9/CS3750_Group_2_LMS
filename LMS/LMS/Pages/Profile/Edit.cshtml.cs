@@ -193,7 +193,7 @@ namespace LMS.Pages.Profile
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Profile saved successfully!";
-                return RedirectToPage("/Profile");
+                return RedirectToPage("Index");
             }
             catch (Exception ex)
             {
@@ -206,7 +206,7 @@ namespace LMS.Pages.Profile
 
         private string GetUserId()
         {
-            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "demo-user-123";
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
         private async Task LoadProfileData()

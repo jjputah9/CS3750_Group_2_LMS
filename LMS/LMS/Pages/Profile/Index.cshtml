@@ -1,5 +1,5 @@
 ﻿@page
-@model LMS.Pages.ProfileModel
+@model ProfileModel
 @{
     ViewData["Title"] = "Profile";
 }
@@ -212,10 +212,10 @@
             }
             else
             {
-                @Model.Initials
+                @Model.UserProfile?.Initials
             }
         </div>
-        <h1 class="profile-name">@Model.FullName</h1>
+        <h1 class="profile-name">@Model.UserProfile?.FullName</h1>
 
         <a href="/Profile/Edit" class="btn-edit">Edit Profile</a>
     </div>

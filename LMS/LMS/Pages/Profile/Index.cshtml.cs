@@ -5,16 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 
-namespace LMS.Pages
+namespace LMS.Pages.Profile
 {
     [Authorize]
     public class ProfileModel : PageModel
     {
         public UserProfile? UserProfile { get; set; }
-        public string FullName { get; set; }
-        public string Initials { get; set; }
-        public bool HasProfile { get; set; } = false;
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
@@ -31,6 +29,14 @@ namespace LMS.Pages
 
         public async Task OnGetAsync()
         {
+            // need to redo entire structure here
+            // needs to check for existing profile, if not create one based on the user's name and email
+            // leave all other fields empty so they can be edited by the user
+            // currently throws an error because the user profile is not found
+            // , need to handle this case and create a default profile for the user
+            // also, need to see what is going on with the creation of FullName and Initials
+            // they might be being 'created' every time the page is loaded.
+
             CurrentUser = await _userManager.GetUserAsync(User);
 
             if (CurrentUser == null)
@@ -39,12 +45,24 @@ namespace LMS.Pages
             UserProfile = await _context.UserProfiles
                 .FirstOrDefaultAsync(p => p.UserId == CurrentUser.Id);
 
-            if (UserProfile != null)
+            if (UserProfile == null)
             {
-                FullName = UserProfile.FullName;
-                Initials = UserProfile.Initials;
-                HasProfile = true;
+                // user profile not found, create a default one based on the user's name
+                var firstName = CurrentUser.fName ?? "Unknown";
+                var lastName = CurrentUser.lName ?? "User";
+
+                UserProfile = new UserProfile
+                {
+                    UserId = CurrentUser.Id,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    BirthDate = CurrentUser.DOB
+                };
+
+                _context.UserProfiles.Add(UserProfile);
+                await _context.SaveChangesAsync();
             }
+
         }
 
         private string GetInitials(string firstName, string lastName)
