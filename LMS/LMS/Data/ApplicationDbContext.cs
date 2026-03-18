@@ -2,6 +2,7 @@
 ﻿using LMS.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using LMS.models;
 
 namespace LMS.Data
 {
@@ -27,6 +28,8 @@ namespace LMS.Data
         public DbSet<Assignment> Assignment { get; set; } = default!;
 
         public DbSet<submittedAssignment> submittedAssignments { get; set; } = default!;
+        
+        public DbSet<Notifications> Notifications { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

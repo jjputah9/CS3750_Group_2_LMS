@@ -55,7 +55,12 @@
                         trigger: 'manual',
                         placement: 'bottom',
                         title: 'Notifications',
-                        content: 'New Assignment for CS 3750'
+                        content: `
+                                <div id="notificationContent" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span>New Assignment for CS 3750</span>
+                                    <i id="deleteNotification" class="fa-solid fa-xmark" style="cursor:pointer; color:red;"></i>
+                                </div>
+                            `
                     }).popover('show');
 
                     // Switch icon to X (Font Awesome)
@@ -67,6 +72,19 @@
                     $('#notificationIcon').removeClass('fa-xmark').addClass('fa-bell');
                     notificationShown = false;
                 }
+
+                    // Delete notification when X is clicked
+                $(document).on('click', '#deleteNotification', function () {
+                    // Remove notification content
+                    $('#notificationContent').html('<span style="color:gray;">No notifications</span>');
+
+                    // Optional: auto-close popover
+                    setTimeout(function () {
+                        $('#notificationBtn').popover('hide');
+                        $('#notificationIcon').removeClass('fa-xmark').addClass('fa-bell');
+                        notificationShown = false;
+                    }, 800);
+                });
             });
 
             // Click outside to hide popover and reset icon

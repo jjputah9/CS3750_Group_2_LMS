@@ -25,6 +25,8 @@ namespace LMS.Models
 
         public string textSubmission { get; set; } = string.Empty;
 
+        public DateTime GradedAt { get; set; } = DateTime.UtcNow;
+
         public int grade { get; set; }
     }
 }
