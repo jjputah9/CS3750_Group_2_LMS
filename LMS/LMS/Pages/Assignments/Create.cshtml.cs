@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using LMS.Data;
 using LMS.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +33,6 @@ namespace LMS.Pages.Assignments
 
         public async Task<IActionResult> OnGetAsync(int courseId)
         {
-            // must arrive from dashboard
             var activeCourseId = HttpContext.Session.GetInt32("ActiveCourseId");
             if (activeCourseId == null || activeCourseId.Value != courseId)
                 return Forbid();
@@ -40,7 +41,6 @@ namespace LMS.Pages.Assignments
             if (user == null) return Challenge();
             if (user.UserType != "Instructor") return Forbid();
 
-            // ✅ Change c.CourseId -> c.Id if your key is Id
             var course = await _context.Course.FirstOrDefaultAsync(c =>
                 c.Id == courseId && c.InstructorEmail == user.Email);
 
@@ -48,7 +48,6 @@ namespace LMS.Pages.Assignments
 
             CourseId = courseId;
             CourseHeader = $"{course.DeptName} {course.CourseNum} - {course.CourseTitle}";
-
             Assignment.CourseId = courseId;
 
             ViewData["SubmissionTypeId"] = new SelectList(
@@ -62,7 +61,6 @@ namespace LMS.Pages.Assignments
 
         public async Task<IActionResult> OnPostAsync(int courseId)
         {
-            // must arrive from dashboard
             var activeCourseId = HttpContext.Session.GetInt32("ActiveCourseId");
             if (activeCourseId == null || activeCourseId.Value != courseId)
                 return Forbid();
@@ -71,13 +69,11 @@ namespace LMS.Pages.Assignments
             if (user == null) return Challenge();
             if (user.UserType != "Instructor") return Forbid();
 
-            // ✅ Change c.CourseId -> c.Id if your key is Id
             var course = await _context.Course.FirstOrDefaultAsync(c =>
                 c.Id == courseId && c.InstructorEmail == user.Email);
 
             if (course == null) return Forbid();
 
-            // Force correct course (prevents user from posting a different CourseId)
             Assignment.CourseId = courseId;
 
             CourseId = courseId;
@@ -85,7 +81,6 @@ namespace LMS.Pages.Assignments
 
             if (!ModelState.IsValid)
             {
-                // Rebuild dropdowns for redisplay
                 ViewData["SubmissionTypeId"] = new SelectList(
                     _context.Set<SubmissionType>(),
                     "SubmissionTypeId",
@@ -99,7 +94,30 @@ namespace LMS.Pages.Assignments
             _context.Assignment.Add(Assignment);
             await _context.SaveChangesAsync();
 
-            // ✅ Redirect back to assignments list for this course
+            var studentIds = await _context.Registration
+                .Where(r => r.CourseID == courseId && r.StudentID != null)
+                .Select(r => r.StudentID!)
+                .Distinct()
+                .ToListAsync();
+
+            if (studentIds.Any())
+            {
+                var notifications = studentIds.Select(studentId => new Notifications
+                {
+                    UserId = studentId,
+                    NotificationType = "AssignmentCreated",
+                    AssignmentId = Assignment.AssignmentId,
+                    SubmittedAssignmentId = null,
+                    Message = $"New assignment posted in {course.DeptName} {course.CourseNum}: {Assignment.Title}",
+                    NotificationDeleted = false,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+
+                _context.Notifications.AddRange(notifications);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToPage("/Assignments/Index", new { courseId });
         }
     }
