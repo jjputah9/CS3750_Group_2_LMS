@@ -7,7 +7,7 @@
     ViewData["Title"] = "Registration";
 }
 
-<h1 class="mb-4">Add/Drop Courses</h1>
+<h1 class="mb-4" id="Registration_Title">Add/Drop Courses</h1>
 
 <!-- ===================== Search / Filter Section ===================== -->
 <form method="get">
@@ -16,6 +16,7 @@
         <!-- Search box -->
         <div class="col-md-5">
             <input type="text"
+                   id="Registration_Search_Bar"
                    name="SearchTerm"
                    value="@Model.SearchTerm"
                    class="form-control"
@@ -45,7 +46,8 @@
         <div class="col-md-4 offset-md-5">
             <select name="SelectedCredits"
                     asp-items="Model.CreditList"
-                    class="form-select">
+                    class="form-select"
+                    id="Registration_Credit_Hours">
                 <option value="">All Credits</option>
             </select>
         </div>
@@ -55,6 +57,7 @@
     <div class="row mb-4">
         <div class="col-md-2 offset-md-10">
             <button type="submit"
+                    id="Registration_Submit_Button"
                     class="btn btn-primary w-100">
                 Search
             </button>
@@ -142,7 +145,7 @@
     }
     else
     {
-        <div class="col-12">
+        <div class="col-12" id="Search_Failure_Notice">
             <p class="text-muted">No courses found for your search/filter criteria.</p>
         </div>
     }
