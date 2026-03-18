@@ -80,7 +80,7 @@ namespace LMS.Tests.SeleniumTests
 
             //Next, search for one card
             searchBar.Clear();
-            searchBar.SendKeys("TEST 0000"); // Should only be matched by one class
+            searchBar.SendKeys("TEST 0"); // Should only be matched by one class
 
             wait.Until(d => d.FindElement(By.CssSelector(".card"))); //Wait for cards to appear
 
