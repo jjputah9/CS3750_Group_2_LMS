@@ -8,9 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using LMS.Data;
 using LMS.Models;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LMS.Pages.Assignments
@@ -23,7 +21,7 @@ namespace LMS.Pages.Assignments
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public AssignmentSubmitModel(
-            ApplicationDbContext context, 
+            ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IWebHostEnvironment webHostEnvironment)
         {
@@ -32,15 +30,15 @@ namespace LMS.Pages.Assignments
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public Assignment Assignment { get; set; }
-        public string SubmissionTypeName { get; set; }
+        public Assignment Assignment { get; set; } = default!;
+        public string SubmissionTypeName { get; set; } = string.Empty;
         public bool HasSubmitted { get; set; }
 
         [BindProperty]
-        public IFormFile SubmittedFile { get; set; }
+        public IFormFile? SubmittedFile { get; set; }
 
         [BindProperty]
-        public string TextSubmission { get; set; }
+        public string TextSubmission { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync(int assignmentId)
         {
@@ -58,9 +56,8 @@ namespace LMS.Pages.Assignments
 
             SubmissionTypeName = Assignment.SubmissionType?.TypeName ?? "";
 
-            // Check if student has already submitted (check database)
             HasSubmitted = await _context.submittedAssignments
-                .AnyAsync(s => s.AssignmentId == assignmentId && s.StudentId.ToString() == user.Id);
+                .AnyAsync(s => s.AssignmentId == assignmentId && s.StudentId == user.Id);
 
             HttpContext.Session.SetInt32("ActiveCourseId", Assignment.CourseId);
 
@@ -83,9 +80,8 @@ namespace LMS.Pages.Assignments
 
             SubmissionTypeName = Assignment.SubmissionType?.TypeName ?? "";
 
-            // Check if already submitted (check database)
             var existingSubmission = await _context.submittedAssignments
-                .FirstOrDefaultAsync(s => s.AssignmentId == assignmentId && s.StudentId.ToString() == user.Id);
+                .FirstOrDefaultAsync(s => s.AssignmentId == assignmentId && s.StudentId == user.Id);
 
             if (existingSubmission != null)
             {
@@ -96,6 +92,8 @@ namespace LMS.Pages.Assignments
             var submissionsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "submissions", assignmentId.ToString());
             string filePath = "";
 
+            submittedAssignment? submission = null;
+
             if (SubmissionTypeName == "File Upload")
             {
                 if (SubmittedFile == null || SubmittedFile.Length == 0)
@@ -104,28 +102,24 @@ namespace LMS.Pages.Assignments
                     return Page();
                 }
 
-                // Create submissions folder structure: wwwroot/submissions/assignmentId/
                 if (!Directory.Exists(submissionsFolder))
                 {
                     Directory.CreateDirectory(submissionsFolder);
                 }
 
-                // Create filename: studentId_assignmentId_timestamp_originalFileName
                 var fileExtension = Path.GetExtension(SubmittedFile.FileName);
                 var fileName = $"{user.Id}_{assignmentId}_{DateTime.Now:yyyyMMddHHmmss}{fileExtension}";
                 filePath = Path.Combine(submissionsFolder, fileName);
 
-                // Save the file
                 using (var stream = System.IO.File.Create(filePath))
                 {
                     await SubmittedFile.CopyToAsync(stream);
                 }
 
-                // Save to database
-                var submission = new submittedAssignment
+                submission = new submittedAssignment
                 {
                     AssignmentId = assignmentId,
-                    StudentId = user.Id, // NOTE: This assumes user.Id can be parsed to int
+                    StudentId = user.Id,
                     submissionTypeId = Assignment.SubmissionTypeId,
                     filePath = $"/submissions/{assignmentId}/{fileName}",
                     submissionDate = DateTime.Now,
@@ -146,24 +140,20 @@ namespace LMS.Pages.Assignments
                     return Page();
                 }
 
-                // Create submissions folder structure: wwwroot/submissions/assignmentId/
                 if (!Directory.Exists(submissionsFolder))
                 {
                     Directory.CreateDirectory(submissionsFolder);
                 }
 
-                // Create filename: studentId_assignmentId_timestamp.txt
                 var fileName = $"{user.Id}_{assignmentId}_{DateTime.Now:yyyyMMddHHmmss}.txt";
                 filePath = Path.Combine(submissionsFolder, fileName);
 
-                // Save text submission as a text file
                 await System.IO.File.WriteAllTextAsync(filePath, TextSubmission);
 
-                // Save to database
-                var submission = new submittedAssignment
+                submission = new submittedAssignment
                 {
                     AssignmentId = assignmentId,
-                    StudentId = user.Id, // NOTE: This assumes user.Id can be parsed to int
+                    StudentId = user.Id,
                     submissionTypeId = Assignment.SubmissionTypeId,
                     filePath = $"/submissions/{assignmentId}/{fileName}",
                     submissionDate = DateTime.Now,
@@ -175,6 +165,29 @@ namespace LMS.Pages.Assignments
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Submission saved successfully!";
+            }
+
+            if (submission != null && Assignment.Course != null && !string.IsNullOrWhiteSpace(Assignment.Course.InstructorEmail))
+            {
+                var instructor = await _userManager.FindByEmailAsync(Assignment.Course.InstructorEmail);
+
+                if (instructor != null)
+                {
+                    var notification = new Notifications
+                    {
+                        UserId = instructor.Id,
+                        NotificationType = "AssignmentSubmitted",
+                        AssignmentId = assignmentId,
+                        SubmittedAssignmentId = submission.submittedAssignmentId,
+                        Message = $"{user.fName} {user.lName} submitted: {Assignment.Title}",
+                        NotificationDeleted = false,
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return RedirectToPage("/Assignments/StudentAssignments", new { courseId = Assignment.CourseId });
