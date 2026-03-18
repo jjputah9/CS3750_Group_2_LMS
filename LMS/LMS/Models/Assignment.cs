@@ -19,6 +19,8 @@ namespace LMS.Models
         public int CourseId { get; set; }
         [Required]
         public int SubmissionTypeId { get; set; }
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         // Navigation property
         public Course? Course { get; set; }
         public SubmissionType? SubmissionType { get; set; }
