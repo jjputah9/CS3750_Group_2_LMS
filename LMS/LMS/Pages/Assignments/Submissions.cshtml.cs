@@ -27,6 +27,9 @@ namespace LMS.Pages.Assignments
         public int AssignmentId { get; set; }
         public Assignment Assignment { get; set; }
 
+        // Grade distribution for pie chart
+        public GradeDistributionData GradeDistribution { get; set; }
+
         // View model for displaying submission data
         public class SubmissionViewModel
         {
@@ -99,7 +102,99 @@ namespace LMS.Pages.Assignments
             .ThenBy(s => s.FirstName)
             .ToList();
 
+            // Calculate grade distribution for pie chart
+            GradeDistribution = CalculateGradeDistribution(submissions, Assignment.Points);
+
             return Page();
         }
+
+        private GradeDistributionData CalculateGradeDistribution(List<submittedAssignment> submissions, int totalPoints)
+        {
+            var distribution = new GradeDistributionData
+            {
+                TotalStudents = submissions.Count,
+                GradedStudents = submissions.Count(s => s.grade > 0),
+                UngradedStudents = submissions.Count(s => s.grade == 0),
+                GradeCategories = new List<GradeCategory>()
+            };
+
+            if (totalPoints > 0)
+            {
+                var categories = new Dictionary<string, int>
+                {
+                    { "A (90-100%)", 0 },
+                    { "B (80-89%)", 0 },
+                    { "C (70-79%)", 0 },
+                    { "D (60-69%)", 0 },
+                    { "F (Below 60%)", 0 },
+                    { "Not Graded", 0 }
+                };
+
+                foreach (var submission in submissions)
+                {
+                    if (submission.grade == 0)
+                    {
+                        categories["Not Graded"]++;
+                    }
+                    else
+                    {
+                        var percentage = (submission.grade / (double)totalPoints) * 100;
+
+                        if (percentage >= 90)
+                            categories["A (90-100%)"]++;
+                        else if (percentage >= 80)
+                            categories["B (80-89%)"]++;
+                        else if (percentage >= 70)
+                            categories["C (70-79%)"]++;
+                        else if (percentage >= 60)
+                            categories["D (60-69%)"]++;
+                        else
+                            categories["F (Below 60%)"]++;
+                    }
+                }
+
+                distribution.GradeCategories = categories
+                    .Where(c => c.Value > 0)
+                    .Select(c => new GradeCategory
+                    {
+                        Name = c.Key,
+                        Count = c.Value,
+                        Percentage = (c.Value / (double)submissions.Count) * 100
+                    })
+                    .ToList();
+
+                // Calculate statistics for graded students only
+                var gradedSubmissions = submissions.Where(s => s.grade > 0).ToList();
+                if (gradedSubmissions.Any())
+                {
+                    var grades = gradedSubmissions.Select(s => s.grade);
+                    distribution.AverageGrade = Math.Round(grades.Average(), 1);
+                    distribution.AveragePercentage = Math.Round((distribution.AverageGrade / totalPoints) * 100, 1);
+                    distribution.HighestGrade = grades.Max();
+                    distribution.LowestGrade = grades.Min();
+                }
+            }
+
+            return distribution;
+        }
+    }
+
+    public class GradeDistributionData
+    {
+        public int TotalStudents { get; set; }
+        public int GradedStudents { get; set; }
+        public int UngradedStudents { get; set; }
+        public double AverageGrade { get; set; }
+        public double AveragePercentage { get; set; }
+        public int HighestGrade { get; set; }
+        public int LowestGrade { get; set; }
+        public List<GradeCategory> GradeCategories { get; set; }
+    }
+
+    public class GradeCategory
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
+        public double Percentage { get; set; }
     }
 }

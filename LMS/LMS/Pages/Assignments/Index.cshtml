@@ -16,8 +16,8 @@
 
             <div class="ms-auto">
                 <a class="btn btn-primary"
-                   asp-page="./Create"
-                   asp-route-courseId="@Model.CourseId">
+                       asp-page="./Create"
+                       asp-route-courseId="@Model.CourseId">
                     + New Assignment
                 </a>
             </div>
@@ -57,18 +57,18 @@
                             <td class="d-none d-md-table-cell">@item.SubmissionType?.TypeName</td>
                             <td class="text-end">
                                 <a class="btn btn-sm btn-outline-secondary"
-                                   asp-page="./Edit"
-                                   asp-route-id="@item.AssignmentId">
+                                       asp-page="./Edit"
+                                       asp-route-id="@item.AssignmentId">
                                     Edit
                                 </a>
                                 <a class="btn btn-sm btn-outline-danger ms-1"
-                                   asp-page="./Delete"
-                                   asp-route-id="@item.AssignmentId">
+                                       asp-page="./Delete"
+                                       asp-route-id="@item.AssignmentId">
                                     Delete
                                 </a>
                                 <a class="btn btn-sm btn-outline-primary"
-                                   asp-page="./Submissions"
-                                   asp-route-assignmentId="@item.AssignmentId">
+                                       asp-page="./Submissions"
+                                       asp-route-assignmentId="@item.AssignmentId">
                                     Submissions
                                 </a>
                             </td>
@@ -83,3 +83,188 @@
         <a class="btn btn-link px-0" asp-page="/Dashboard/Index">← Back to Dashboard</a>
     </div>
 </div>
+
+<!-- Course Grade Distribution Chart - Placed Below Assignments List -->
+@if (Model.CourseGrades != null && Model.CourseGrades.GradeCategories.Any())
+{
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Overall Course Grade Distribution</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <canvas id="courseGradePieChart" style="max-height: 300px; width: 100%;"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5>Course Performance Summary</h5>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Total Students:</strong> <span class="badge bg-primary">@Model.CourseGrades.TotalStudents</span></p>
+                                        <p><strong>Average Grade:</strong> <span class="badge bg-info">@Model.CourseGrades.AveragePercentage.ToString("F1")%</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Highest Grade:</strong> <span class="badge bg-success">@Model.CourseGrades.HighestGrade.ToString("F1")%</span></p>
+                                        <p><strong>Lowest Grade:</strong> <span class="badge bg-danger">@Model.CourseGrades.LowestGrade.ToString("F1")%</span></p>
+                                    </div>
+                                </div>
+                                <hr />
+                                <h6>Grade Breakdown:</h6>
+                                <div class="mt-2">
+                                    @foreach (var category in Model.CourseGrades.GradeCategories)
+                                    {
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    @if (category.Name.Contains("A"))
+                                                    {
+                                                        <span class="badge" style="background-color: #28a745;">●</span>
+                                                    }
+                                                    else if (category.Name.Contains("B"))
+                                                    {
+                                                        <span class="badge" style="background-color: #17a2b8;">●</span>
+                                                    }
+                                                    else if (category.Name.Contains("C"))
+                                                    {
+                                                        <span class="badge" style="background-color: #ffc107;">●</span>
+                                                    }
+                                                    else if (category.Name.Contains("D"))
+                                                    {
+                                                        <span class="badge" style="background-color: #fd7e14;">●</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge" style="background-color: #dc3545;">●</span>
+                                                    }
+                                                    @category.Name
+                                                </span>
+                                                <span>
+                                                    <strong>@category.Count</strong> students
+                                                    <span class="text-muted">(@category.Percentage.ToString("F1")%)</span>
+                                                </span>
+                                            </div>
+                                            <div class="progress mt-1" style="height: 6px;">
+                                                <div class="progress-bar" role="progressbar"
+                                                     style="width: @category.Percentage%;
+                                                    @if (category.Name.Contains("A"))
+                                                    {
+                                                        <text>background-color: #28a745;</text>
+                                                    }
+                                                    else if (category.Name.Contains("B"))
+                                                    {
+
+                                                        <text>background-color: #17a2b8;</text>
+                                                    }
+                                                    else if (category.Name.Contains("C"))
+                                                    {
+
+                                                        <text>background-color: #ffc107;</text>
+                                                    }
+                                                    else if (category.Name.Contains("D"))
+                                                    {
+
+                                                        <text>background-color: #fd7e14;</text>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <text>background-color: #dc3545;</text>
+                                                    }
+                                                    "
+                                                     aria-valuenow="@category.Percentage" aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.Assignment != null && Model.Assignment.Any())
+{
+    <div class="container mt-4">
+        <div class="alert alert-info">
+            No grades available yet. Students need to submit assignments to see course grades.
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        @if (Model.CourseGrades != null && Model.CourseGrades.GradeCategories.Any())
+        {
+            <text>
+                var ctx = document.getElementById('courseGradePieChart').getContext('2d');
+                var gradeCategories = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.CourseGrades.GradeCategories));
+                
+                var labels = gradeCategories.map(c => `${c.Name} (${c.Count} students)`);
+                var counts = gradeCategories.map(c => c.Count);
+                
+                var colors = gradeCategories.map(c => {
+                if (c.Name.includes("A")) return 'rgba(40, 167, 69, 0.8)';
+                if (c.Name.includes("B")) return 'rgba(23, 162, 184, 0.8)';
+                if (c.Name.includes("C")) return 'rgba(255, 193, 7, 0.8)';
+                if (c.Name.includes("D")) return 'rgba(253, 126, 20, 0.8)';
+                return 'rgba(220, 53, 69, 0.8)';
+                });
+                
+                var borderColors = colors.map(c => c.replace('0.8', '1'));
+                
+                new Chart(ctx, {
+                type: 'pie',
+                data: {
+                labels: labels,
+                datasets: [{
+                data: counts,
+                backgroundColor: colors,
+                borderColor: borderColors,
+                borderWidth: 2
+                }]
+                },
+                options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                legend: {
+                position: 'bottom',
+                labels: {
+                font: { size: 12 },
+                padding: 10
+                }
+                },
+                tooltip: {
+                callbacks: {
+                label: function(context) {
+                var label = context.label || '';
+                var value = context.raw;
+                var total = @Model.CourseGrades.TotalStudents;
+                var percentage = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} student${value !== 1 ? 's' : ''} (${percentage}%)`;
+                }
+                }
+                }
+                },
+                title: {
+                display: true,
+                text: 'Course Grade Distribution',
+                font: { size: 16, weight: 'bold' },
+                padding: { bottom: 20 }
+                }
+                }
+                });
+            </text>
+        }
+        });
+    </script>
+}
