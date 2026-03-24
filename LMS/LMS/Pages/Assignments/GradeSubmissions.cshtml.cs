@@ -10,6 +10,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
+using NuGet.Common;
 
 namespace LMS.Pages.Assignments
 {
@@ -130,6 +132,7 @@ namespace LMS.Pages.Assignments
             }
 
             Submission.grade = Grade;
+            Submission.GradedAt = DateTime.UtcNow; //Set the grade date to now
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Grade saved successfully!";

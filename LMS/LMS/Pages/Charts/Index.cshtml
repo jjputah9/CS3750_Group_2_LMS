@@ -10,31 +10,54 @@
 
 <h2>Sample Google Chart</h2>
 
+
+<canvas id="myChart"></canvas>
+
 <!-- Load Google Charts -->
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
-<script type="text/javascript">
-    google.charts.load('current', { packages: ['corechart'] });
-    google.charts.setOnLoadCallback(drawChart);
-
-    function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-            ['Month', 'Sales'],
-            ['January',  1000],
-            ['February', 1170],
-            ['March',  660],
-            ['April',  1030]
-        ]);
-
-        var options = {
-            title: 'Monthly Sales',
-            width: 600,
-            height: 400
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@@sgratzl/chartjs-chart-boxplot@3.6.0/build/index.umd.min.js"></script>
+    <script>
+        // setup 
+        const data = {
+        labels: ['Mon'],
+        datasets: [{
+            label: 'Weekly Sales',
+            outlierColor: '#999999',
+            padding: 0,
+            itemRadius: 0,
+            outlierRadius: 0,
+            data:
+            [
+                [1,2,3,3,4,32,2,3,14,1,24,1,34,23,12,2,4]
+            ],
+            backgroundColor: 'rgba(255, 26, 104, 0.2)',
+            borderColor: 'rgba(255, 26, 104, 1)',
+            borderWidth: 1
+        }]
         };
 
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-    }
-</script>
+        // config 
+        const config = {
+        type: 'boxplot',
+        data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+            elements: {
+                point: {
+                    radius: 0,
+                    display:
+                }
+            }
+        }
+        };
 
-<div id="chart_div"></div>
+        // render init block
+        const myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+        );
+</script>
