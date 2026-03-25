@@ -37,6 +37,7 @@ namespace LMS_Test
             {
                 Id = 1,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 101,
                 CourseTitle = "Intro to Unit Testing",
@@ -112,6 +113,7 @@ namespace LMS_Test
             {
                 Id = 2,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 102,
                 CourseTitle = "Advanced Testing",

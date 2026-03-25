@@ -55,6 +55,7 @@ namespace LMS.Tests
                 CreditHours = 3,
                 Capacity = 20,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = System.DateTime.Today.AddHours(9),
                 EndTime = System.DateTime.Today.AddHours(10)
@@ -102,6 +103,7 @@ namespace LMS.Tests
                 CreditHours = 3,
                 Capacity = 20,
                 InstructorEmail = "otherinstructor@test.com",
+                InstructorName = "Instructor, OtherTest",
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = System.DateTime.Today.AddHours(9),
                 EndTime = System.DateTime.Today.AddHours(10)
@@ -143,6 +145,7 @@ namespace LMS.Tests
                 CreditHours = 3,
                 Capacity = 20,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = System.DateTime.Today.AddHours(9),
                 EndTime = System.DateTime.Today.AddHours(10)

@@ -72,7 +72,8 @@ namespace LMS.Tests
                 Location = "Test Room",
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = DateTime.Today.AddHours(9),
-                EndTime = DateTime.Today.AddHours(10)
+                EndTime = DateTime.Today.AddHours(10),
+                InstructorName = "Instructor, Test"
             };
 
             // Act
@@ -115,7 +116,8 @@ namespace LMS.Tests
                 Capacity = 20,
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = DateTime.Today.AddHours(9),
-                EndTime = DateTime.Today.AddHours(10)
+                EndTime = DateTime.Today.AddHours(10),
+                InstructorName = "Instructor, Test"
                 // Missing CourseTitle
             };
 
@@ -154,7 +156,8 @@ namespace LMS.Tests
                 Capacity = 25,
                 MeetDays = new bool[] { true, true, false, false, false },
                 StartTime = DateTime.Today.AddHours(11),
-                EndTime = DateTime.Today.AddHours(12)
+                EndTime = DateTime.Today.AddHours(12),
+                InstructorName = "Instructor, Test"
             };
 
             await pageModel.OnPostAsync();
@@ -185,7 +188,8 @@ namespace LMS.Tests
                 Capacity = 20,
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = DateTime.Today.AddHours(9),
-                EndTime = DateTime.Today.AddHours(10)
+                EndTime = DateTime.Today.AddHours(10),
+                InstructorName = "Instructor, Test"
             };
 
             var result = await pageModel.OnPostAsync();
@@ -222,7 +226,8 @@ namespace LMS.Tests
                 Location = "Room 101",
                 MeetDays = new bool[] { false, true, false, true, false },
                 StartTime = DateTime.Today.AddHours(14),
-                EndTime = DateTime.Today.AddHours(15)
+                EndTime = DateTime.Today.AddHours(15),
+                InstructorName = "Instructor, Test"
             };
 
             await pageModel.OnPostAsync();
