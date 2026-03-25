@@ -49,9 +49,11 @@
                             <td class="text-end">
                                 @if (Model.SubmittedAssignmentIds.Contains(item.AssignmentId))
                                 {
-                                    <button type="button" class="btn btn-sm btn-secondary ms-1" disabled>
-                                        <i class="bi bi-check-circle"></i> Submitted
-                                    </button>
+                                    <a class="btn btn-sm btn-primary ms-1"
+                                       asp-page="/Assignments/AssignmentSubmit"
+                                       asp-route-assignmentId="@item.AssignmentId">
+                                        View Submission
+                                    </a>
                                 }
                                 else
                                 {

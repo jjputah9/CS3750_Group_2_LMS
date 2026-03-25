@@ -10,6 +10,7 @@ using LMS.Models;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LMS.Pages.Assignments
 {
@@ -31,6 +32,8 @@ namespace LMS.Pages.Assignments
         }
 
         public Assignment Assignment { get; set; } = default!;
+        public submittedAssignment ExistingSubmission { get; set; } = default!;
+        public GradeBoxPlotData boxPlotData { get; set; } = default!;
         public string SubmissionTypeName { get; set; } = string.Empty;
         public bool HasSubmitted { get; set; }
 
@@ -58,6 +61,23 @@ namespace LMS.Pages.Assignments
 
             HasSubmitted = await _context.submittedAssignments
                 .AnyAsync(s => s.AssignmentId == assignmentId && s.StudentId == user.Id);
+
+            if (HasSubmitted) // If there is a submission, load it
+            {
+                ExistingSubmission = await _context.submittedAssignments
+                .FirstAsync(s => s.AssignmentId == assignmentId && s.StudentId == user.Id);
+
+                if (ExistingSubmission.GradedAt != DateTime.UnixEpoch) // If assignment has been graded, calc graph
+                {
+                    var submissions = await _context.submittedAssignments
+                    .Where(s => s.AssignmentId == assignmentId && s.GradedAt != DateTime.UnixEpoch)
+                    .Select(s => s.grade)
+                    .OrderBy(s => s)
+                    .ToArrayAsync();
+
+                    boxPlotData = new GradeBoxPlotData(submissions, Assignment.Points);
+                }
+            }
 
             HttpContext.Session.SetInt32("ActiveCourseId", Assignment.CourseId);
 
@@ -190,7 +210,64 @@ namespace LMS.Pages.Assignments
                 }
             }
 
-            return RedirectToPage("/Assignments/StudentAssignments", new { courseId = Assignment.CourseId });
+            return Page();
+        }
+
+        /// <summary>
+        /// Returns true if the graph should be displayed (if a submission exists and has been graded)
+        /// </summary>
+        /// <returns></returns>
+        public bool ShouldGraphBeDisplayed()
+        {
+            return HasSubmitted && (ExistingSubmission.GradedAt != DateTime.UnixEpoch);
+        }
+
+        /// <summary>
+        /// Converts an int/int relationship to a percentage double
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public double ToPercent(int? value, int? max)
+        {
+            return (value != null && max != null) ? (double)value * 100 / (double)max : 0;
+        }
+    }
+
+    public class GradeBoxPlotData
+    {
+        public int[] allData { get; set; }
+        public double AverageGrade { get; set; }
+        public double AveragePercentage { get; set; }
+        public double Quartile1 { get; set; }
+        public double Median { get; set; }
+        public double Quartile3 { get; set; }
+        public int HighestGrade { get; set; }
+        public double HighestPercentage { get; set; }
+        public int LowestGrade { get; set; }
+        public double LowestPercentage { get; set; }
+
+        /// <summary>
+        /// Constructor for the boxplot data, assumes the list is already sorted
+        /// </summary>
+        /// <param name="grades"></param>
+        public GradeBoxPlotData(int[] grades, int maxGrade)
+        {
+            allData = grades;
+            double sum = 0;
+            for (int i = 0; i < grades.Length; i++)
+            {
+                sum += grades[i];
+            }
+            AverageGrade = Math.Round(sum / (double)grades.Length, 1);
+            AveragePercentage = Math.Round(sum * 100 / (double)(grades.Length * maxGrade), 1);
+            Quartile1 = grades[(int)Math.Floor(grades.Length / 4d)];
+            Median = grades[(int)Math.Floor(grades.Length / 2d)];
+            Quartile3 = grades[(int)Math.Floor(3 * grades.Length / 4d)];
+            HighestGrade = grades.Last();
+            HighestPercentage = Math.Round(grades.Last() * 100 / (double)maxGrade, 1);
+            LowestGrade = grades.First();
+            LowestPercentage = Math.Round(grades.First() * 100 / (double)maxGrade, 1);
         }
     }
 }

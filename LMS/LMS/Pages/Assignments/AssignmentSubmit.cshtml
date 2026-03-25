@@ -1,4 +1,7 @@
 ﻿@page "{assignmentId:int}"
+@using Microsoft.CodeAnalysis.CSharp.Syntax
+@using NuGet.Protocol
+@using OpenQA.Selenium.BiDi.Script
 @model LMS.Pages.Assignments.AssignmentSubmitModel
 @{
     ViewData["Title"] = "Submit Assignment";
@@ -11,52 +14,222 @@
         <p class="text-muted">Due: @Model.Assignment?.DueDate.ToString("MMM d, yyyy h:mm tt")</p>
         <p>@Model.Assignment?.Description</p>
         <p><strong>Points:</strong> @Model.Assignment?.Points</p>
+        @if (Model.HasSubmitted){
+            <p><strong>Submitted:</strong> @Model.ExistingSubmission?.submissionDate.ToString("MMM d, yyyy h:mm tt")</p>
+        }
     </div>
+    <br />
 
-    <div class="mt-4">
-        @if (Model.SubmissionTypeName == "File Upload")
-        {
-            <form method="post" enctype="multipart/form-data">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Upload Your File</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="fileUpload" class="form-label">Select File</label>
-                            <input type="file" class="form-control" id="fileUpload" asp-for="SubmittedFile" required>
-                            <span asp-validation-for="SubmittedFile" class="text-danger"></span>
+    @if (!Model.HasSubmitted){
+        <div class="mt-4">
+            @if (Model.SubmissionTypeName == "File Upload")
+            {
+                <form method="post" enctype="multipart/form-data">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Upload Your File</h4>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Assignment</button>
-                        <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Cancel</a>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="fileUpload" class="form-label">Select File</label>
+                                <input type="file" class="form-control" id="fileUpload" asp-for="SubmittedFile" required>
+                                <span asp-validation-for="SubmittedFile" class="text-danger"></span>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                            <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            }
+            else if (Model.SubmissionTypeName == "Text Entry")
+            {
+                <form method="post">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Enter Your Submission</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="textSubmission" class="form-label">Your Answer</label>
+                                <textarea class="form-control" id="textSubmission" asp-for="TextSubmission" rows="10" required></textarea>
+                                <span asp-validation-for="TextSubmission" class="text-danger"></span>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                            <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    Unknown submission type. Please contact your instructor.
+                </div>
+            }
+        </div>
+    }
+    else if (!Model.ShouldGraphBeDisplayed()){
+        <div class="card-header">
+            <h4>Your Submission:</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.SubmissionTypeName == "Text Entry")
+            {
+                <div class="mb-3">
+                    <div class="border rounded p-3 bg-white" style="white-space: pre-wrap;">@Model.ExistingSubmission?.textSubmission</div>
+                </div>
+            }
+            else if (Model.SubmissionTypeName == "File Upload")
+            {
+                var fileName = Model.ExistingSubmission?.filePath?.Split('/').LastOrDefault() ?? 
+                            Model.ExistingSubmission?.filePath?.Split('\\').LastOrDefault() ?? 
+                            "file";
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Submitted File:</label>
+                    <div>
+                        <a asp-page-handler="DownloadFile" 
+                        asp-route-submissionId="@Model.ExistingSubmission?.submittedAssignmentId" 
+                        class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> Download @fileName
+                        </a>
                     </div>
                 </div>
-            </form>
-        }
-        else if (Model.SubmissionTypeName == "Text Entry")
-        {
-            <form method="post">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Enter Your Submission</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="textSubmission" class="form-label">Your Answer</label>
-                            <textarea class="form-control" id="textSubmission" asp-for="TextSubmission" rows="10" required></textarea>
-                            <span asp-validation-for="TextSubmission" class="text-danger"></span>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit Assignment</button>
-                        <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Cancel</a>
+            }
+        </div>
+
+        <br />
+
+        <div class="alert alert-info">
+            The assignment has yet to be graded.
+        </div>
+        <br />
+        <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Back</a>
+    }
+    else{
+        <div class="card-header">
+            <h4>Your Submission:</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.SubmissionTypeName == "Text Entry")
+            {
+                <div class="mb-3">
+                    <div class="border rounded p-3 bg-white" style="white-space: pre-wrap;">@Model.ExistingSubmission?.textSubmission</div>
+                </div>
+            }
+            else if (Model.SubmissionTypeName == "File Upload")
+            {
+                var fileName = Model.ExistingSubmission?.filePath?.Split('/').LastOrDefault() ?? 
+                            Model.ExistingSubmission?.filePath?.Split('\\').LastOrDefault() ?? 
+                            "file";
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Submitted File:</label>
+                    <div>
+                        <a asp-page-handler="DownloadFile" 
+                        asp-route-submissionId="@Model.ExistingSubmission?.submittedAssignmentId" 
+                        class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> Download @fileName
+                        </a>
                     </div>
                 </div>
-            </form>
-        }
-        else
-        {
-            <div class="alert alert-warning">
-                Unknown submission type. Please contact your instructor.
+            }
+        </div>
+
+        <br />
+        <div class="card mb-4">
+            <div class="card-header">
+            <h4>Grade Distribution</h4>
             </div>
-        }
-    </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5><strong>Your Score:</strong> <span class="badge bg-primary ">@Model.ExistingSubmission?.grade (
+                                @Model.ToPercent(Model.ExistingSubmission?.grade, Model.Assignment?.Points)%)</span></h5>
+                            </div>
+                        </div>
+                        <br />
+                        <canvas id="gradeDistributionBoxPlot" style="max-height: 300px; width: 100%;"></canvas>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5>Grade Details</h5>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p><strong>Average Score:</strong> <span class="badge bg-info">@Model.boxPlotData.AverageGrade (@Model.boxPlotData.AveragePercentage%)</span></p>
+                                        <p><strong>Median Score:</strong> <span class="badge bg-info">@Model.boxPlotData.Median</span></p>
+                                        <p><strong>Highest Score:</strong> <span class="badge bg-success">@Model.boxPlotData.HighestGrade (@Model.boxPlotData.HighestPercentage%)</span></p>
+                                        <p><strong>Lowest Score:</strong> <span class="badge bg-danger">@Model.boxPlotData.LowestGrade (@Model.boxPlotData.LowestPercentage%)</span></p>
+                                        <p><strong>First Quartile:</strong> <span class="badge bg-secondary">@Model.boxPlotData.Quartile1</span></p>
+                                        <p><strong>Third Quartile:</strong> <span class="badge bg-secondary">@Model.boxPlotData.Quartile3</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+        <a asp-page="/Assignments/StudentAssignments" asp-route-courseId="@Model.Assignment?.CourseId" class="btn btn-secondary">Back</a>
+    } 
 </div>
+
+@if (Model.ShouldGraphBeDisplayed()){
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/@@sgratzl/chartjs-chart-boxplot@3.6.0/build/index.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ShouldGraphBeDisplayed()))){
+            // setup 
+            const data = {
+            labels: [''],
+            datasets: [
+            { //Highlight user score
+                label: 'Your Score',
+                type: 'line',
+                data: [@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ExistingSubmission?.grade))],
+                pointBackgroundColor: 'rgba(13, 110, 253, 0.8)',
+                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                borderColor: 'rgba(33, 37, 41, 0.8)',
+                pointBorderColor: 'rgba(33, 37, 41, 0.8)',
+                borderWidth: 1,
+                pointRadius: 8
+            },
+
+            { //Box and whisker
+                label: 'Class Scores',
+                outlierColor: '#999999',
+                padding: 0,
+                outlierRadius: 0,
+                data: [@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.boxPlotData.allData))],
+                type: 'boxplot',
+                backgroundColor: 'rgba(13, 202, 240, 0.5)',
+                borderColor: 'rgba(33, 37, 41, 0.8)',
+                borderWidth: 1,
+                meanRadius: 0
+            }
+            ]
+            };
+
+            // config 
+            const config = {
+            type: 'boxplot',
+            data,
+            options: {
+                events : null,
+                indexAxis: 'y'
+            }
+            };
+
+            // render init block
+            const myChart = new Chart(
+            document.getElementById('gradeDistributionBoxPlot'),
+            config
+            );
+        }
+    });
+</script>
+}
