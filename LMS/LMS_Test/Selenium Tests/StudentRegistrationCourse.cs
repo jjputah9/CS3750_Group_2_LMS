@@ -11,7 +11,7 @@ namespace LMS_Test.Selenium_Tests
     {
         private IWebDriver driver;
         private WebDriverWait wait;
-        private string baseUrl = "https://localhost:5181/";
+        private string baseUrl = "https://localhost:7270/";
 
         [TestInitialize]  // Runs before each test
         public void Setup()
