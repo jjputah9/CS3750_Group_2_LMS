@@ -65,6 +65,7 @@ namespace LMS_Test
             {
                 Id = 500,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 2500,
                 CourseTitle = "Before",
@@ -123,6 +124,7 @@ namespace LMS_Test
             {
                 Id = 501,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 2600,
                 CourseTitle = "Original Title",
@@ -178,6 +180,7 @@ namespace LMS_Test
             {
                 Id = 502,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 2700,
                 CourseTitle = "Original",
@@ -273,6 +276,7 @@ namespace LMS_Test
             {
                 Id = 503,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 2800,
                 CourseTitle = "Before",

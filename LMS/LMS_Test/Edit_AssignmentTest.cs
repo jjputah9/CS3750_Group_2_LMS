@@ -34,6 +34,7 @@ namespace LMS_Test
             {
                 Id = 1,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 101,
                 CourseTitle = "Test Course",
@@ -122,8 +123,8 @@ namespace LMS_Test
             // Add a course
             var course = new Course
             {
-                Id = 2,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 102,
                 CourseTitle = "Another Course",

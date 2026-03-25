@@ -58,6 +58,7 @@ public class RoleAccessTests
                 CreditHours = 3,
                 Capacity = 20,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 MeetDays = new bool[] { true, false, false, false, false },
                 StartTime = System.DateTime.Today.AddHours(9),
                 EndTime = System.DateTime.Today.AddHours(10)

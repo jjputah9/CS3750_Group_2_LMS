@@ -40,6 +40,7 @@ namespace LMS_Test
             {
                 Id = courseId,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 1400,
                 CourseTitle = "Test Course",
@@ -105,6 +106,7 @@ namespace LMS_Test
             {
                 Id = 101,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 1400,
                 CourseTitle = "Test Course",
