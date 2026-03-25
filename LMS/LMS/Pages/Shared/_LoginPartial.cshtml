@@ -9,13 +9,19 @@
 
 @{
     var notificationJson = "[]";
+    var hasMoreThanFive = false;
     var signedInUser = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
 
     if (signedInUser != null && User.HasClaim("UserType", "Student"))
     {
-        var notifications = await DbContext.Notifications
+        var baseQuery = DbContext.Notifications
             .Where(n => n.UserId == signedInUser.Id && !n.NotificationDeleted)
-            .OrderByDescending(n => n.CreatedAt)
+            .OrderByDescending(n => n.CreatedAt);
+
+        hasMoreThanFive = await baseQuery.CountAsync() > 5;
+
+        var notifications = await baseQuery
+            .Take(5)
             .Select(n => new
             {
                 id = n.NotificationId,
@@ -80,19 +86,26 @@
             cursor: pointer;
             color: red;
         }
+
+        .notification-footer {
+            margin-top: 8px;
+            font-size: 14px;
+            color: gray;
+        }
     </style>
 
     <script>
         $(document).ready(function () {
             var notificationShown = false;
             var notifications = @Html.Raw(notificationJson);
+            var hasMoreThanFive = @Html.Raw(hasMoreThanFive.ToString().ToLower());
 
             function buildNotificationHtml() {
                 if (!notifications || notifications.length === 0) {
                     return '<span style="color:gray;">No notifications</span>';
                 }
 
-                return notifications.map(function (n, index) {
+                var html = notifications.map(function (n, index) {
                     return `
                         <div class="notification-row" data-index="${index}">
                             <span class="notification-message">${n.message ?? ''}</span>
@@ -100,6 +113,12 @@
                         </div>
                     `;
                 }).join('');
+
+                if (hasMoreThanFive) {
+                    html += `<div class="notification-footer">Showing 5 most recent notifications</div>`;
+                }
+
+                return html;
             }
 
             $('#notificationBtn').click(function () {
