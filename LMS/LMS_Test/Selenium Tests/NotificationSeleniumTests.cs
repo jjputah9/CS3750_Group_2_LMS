@@ -12,7 +12,7 @@ namespace LMS.Tests.SeleniumTests
     {
         private IWebDriver driver;
         private WebDriverWait wait;
-        private string baseUrl = "https://localhost:5181/"; // Your running project URL
+        private string baseUrl = "https://localhost:7270/"; // Your running project URL
 
         [TestInitialize]
         public void Setup()
