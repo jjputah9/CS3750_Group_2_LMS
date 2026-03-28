@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace LMS.Pages.Registrations
 {
@@ -100,6 +101,10 @@ namespace LMS.Pages.Registrations
         // POST handler for Add/Drop courses
         public async Task<IActionResult> OnPostAsync()
         {
+            // get user
+            CurrentUser = await _userManager.GetUserAsync(User);
+            if (CurrentUser == null) return Challenge();
+
             if (CheckRegistration(Registration.StudentID, Registration.CourseID))
             {
                 // Drop course
@@ -117,7 +122,8 @@ namespace LMS.Pages.Registrations
             }
 
             // clear cache (force dashboard to querey)
-            HttpContext.Session.Remove("UserCourses");
+            var key = $"UserCourses_{CurrentUser.Id}";
+            HttpContext.Session.Remove(key);
 
             return RedirectToPage("/Registrations/Create");
         }
