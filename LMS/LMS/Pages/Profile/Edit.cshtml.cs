@@ -48,160 +48,105 @@ namespace LMS.Pages.Profile
                 return Page();
             }
 
-            try
+            var userId = GetUserId();
+            if (userId == null)
+                return Unauthorized();
+
+            var profile = await _context.UserProfiles
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (profile == null)
             {
-                var userId = GetUserId();
-                var existingProfile = await _context.UserProfiles
-                    .FirstOrDefaultAsync(p => p.UserId == userId);
+                profile = new UserProfile { UserId = userId };
+                _context.UserProfiles.Add(profile);
+            }
 
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
-                // Handle photo removal
-                if (RemovePhoto)
+            // handle photo removal
+            if (RemovePhoto && !string.IsNullOrEmpty(profile.ProfilePictureFileName))
+            {
+                var filePath = Path.Combine(_environment.WebRootPath, "uploads", profile.ProfilePictureFileName);
+
+                if (System.IO.File.Exists(filePath))
                 {
-                    if (existingProfile != null)
+                    try { System.IO.File.Delete(filePath); }
+                    catch (Exception ex)
                     {
-                        // Delete the physical file if it exists
-                        if (!string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
-                        {
-                            var filePath = Path.Combine(_environment.WebRootPath, "uploads", existingProfile.ProfilePictureFileName);
-                            if (System.IO.File.Exists(filePath))
-                            {
-                                try
-                                {
-                                    System.IO.File.Delete(filePath);
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogWarning(ex, "Could not delete profile picture file: {FileName}", existingProfile.ProfilePictureFileName);
-                                }
-                            }
-                        }
-
-                        // Clear all photo-related fields
-                        existingProfile.ProfilePictureUrl = null;
-                        existingProfile.ProfilePictureFileName = null;
-                        existingProfile.ProfilePictureData = null;
-                        existingProfile.ProfilePictureContentType = null;
-                        existingProfile.ProfilePictureUploadedAt = null;
-
-                        _context.UserProfiles.Update(existingProfile);
-                        await _context.SaveChangesAsync();
+                        _logger.LogWarning(ex, "Failed delete old image");
                     }
-
-                    TempData["ImageMessage"] = "Profile photo removed!";
                 }
 
-                // Handle profile picture upload
-                if (ProfilePicture != null && ProfilePicture.Length > 0)
+                profile.ProfilePictureUrl = null;
+                profile.ProfilePictureFileName = null;
+                profile.ProfilePictureData = null;
+                profile.ProfilePictureContentType = null;
+                profile.ProfilePictureUploadedAt = null;
+            }
+
+            // handle photo upload
+            if (ProfilePicture != null && ProfilePicture.Length > 0)
+            {
+                // delete old first
+                if (!string.IsNullOrEmpty(profile.ProfilePictureFileName))
                 {
-                    // First, delete the old file if it exists
-                    if (existingProfile != null && !string.IsNullOrEmpty(existingProfile.ProfilePictureFileName))
+                    var oldPath = Path.Combine(_environment.WebRootPath, "uploads", profile.ProfilePictureFileName);
+                    if (System.IO.File.Exists(oldPath))
                     {
-                        var oldFilePath = Path.Combine(_environment.WebRootPath, "uploads", existingProfile.ProfilePictureFileName);
-                        if (System.IO.File.Exists(oldFilePath))
+                        try { System.IO.File.Delete(oldPath); }
+                        catch (Exception ex)
                         {
-                            try
-                            {
-                                System.IO.File.Delete(oldFilePath);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogWarning(ex, "Could not delete old profile picture file: {FileName}", existingProfile.ProfilePictureFileName);
-                            }
+                            _logger.LogWarning(ex, "Failed delete old image");
                         }
                     }
-
-                    var uploadResult = await SaveProfilePicture(ProfilePicture, userId);
-                    if (!uploadResult.success)
-                    {
-                        ModelState.AddModelError("ProfilePicture", uploadResult.message);
-                        await LoadCurrentImage();
-                        return Page();
-                    }
-
-                    if (existingProfile == null)
-                    {
-                        existingProfile = new UserProfile { UserId = userId };
-                        _context.UserProfiles.Add(existingProfile);
-                    }
-
-                    existingProfile.ProfilePictureUrl = uploadResult.url;
-                    existingProfile.ProfilePictureFileName = uploadResult.fileName;
-                    existingProfile.ProfilePictureData = uploadResult.data;
-                    existingProfile.ProfilePictureContentType = uploadResult.contentType;
-                    existingProfile.ProfilePictureUploadedAt = DateTime.UtcNow;
-
-                    await _context.SaveChangesAsync();
-                    TempData["ImageMessage"] = "Profile picture updated!";
                 }
 
-                // Update AspNetUsers table
-                if (user != null)
+                var upload = await SaveProfilePicture(ProfilePicture, userId);
+
+                if (!upload.success)
                 {
-                    user.fName = Input.FirstName;
-                    user.lName = Input.LastName;
-                    user.PhoneNumber = Input.Phone;
-                    user.DOB = Input.BirthDate;
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("ProfilePicture", upload.message);
+                    await LoadCurrentImage();
+                    return Page();
                 }
 
-                // Update or create profile (excluding photo fields which are handled separately)
-                if (existingProfile == null)
-                {
-                    var newProfile = new UserProfile
-                    {
-                        UserId = userId,
-                        FirstName = Input.FirstName,
-                        LastName = Input.LastName,
-                        Description = Input.Description,
-                        BirthDate = Input.BirthDate,
-                        AddressLine1 = Input.AddressLine1,
-                        AddressLine2 = Input.AddressLine2,
-                        City = Input.City,
-                        State = Input.State,
-                        ZipCode = Input.ZipCode,
-                        Phone = Input.Phone,
-                        Link1 = Input.Link1,
-                        Link2 = Input.Link2,
-                        Link3 = Input.Link3
-                    };
-                    _context.UserProfiles.Add(newProfile);
-                }
-                else
-                {
-                    // Update only non-photo fields
-                    existingProfile.FirstName = Input.FirstName;
-                    existingProfile.LastName = Input.LastName;
-                    existingProfile.Description = Input.Description;
-                    existingProfile.BirthDate = Input.BirthDate;
-                    existingProfile.AddressLine1 = Input.AddressLine1;
-                    existingProfile.AddressLine2 = Input.AddressLine2;
-                    existingProfile.City = Input.City;
-                    existingProfile.State = Input.State;
-                    existingProfile.ZipCode = Input.ZipCode;
-                    existingProfile.Phone = Input.Phone;
-                    existingProfile.Link1 = Input.Link1;
-                    existingProfile.Link2 = Input.Link2;
-                    existingProfile.Link3 = Input.Link3;
-
-                    _context.UserProfiles.Update(existingProfile);
-                }
-
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Profile saved successfully!";
-                return RedirectToPage("Index");
+                profile.ProfilePictureUrl = upload.url;
+                profile.ProfilePictureFileName = upload.fileName;
+                profile.ProfilePictureData = upload.data;
+                profile.ProfilePictureContentType = upload.contentType;
+                profile.ProfilePictureUploadedAt = DateTime.UtcNow;
             }
-            catch (Exception ex)
+
+            // update profile fields
+            profile.FirstName = Input.FirstName;
+            profile.LastName = Input.LastName;
+            profile.Description = Input.Description;
+            profile.BirthDate = Input.BirthDate;
+            profile.AddressLine1 = Input.AddressLine1 ?? "";
+            profile.AddressLine2 = Input.AddressLine2 ?? "";
+            profile.City = Input.City ?? "";
+            profile.State = Input.State ?? "";
+            profile.ZipCode = Input.ZipCode ?? "";
+            profile.Phone = Input.Phone ?? "";
+            profile.Link1 = Input.Link1 ?? "";
+            profile.Link2 = Input.Link2 ?? "";
+            profile.Link3 = Input.Link3 ?? "";
+
+            // update user table for relevant data
+            if (user != null)
             {
-                _logger.LogError(ex, "Error saving profile");
-                ModelState.AddModelError("", "Error saving profile. Please try again.");
-                await LoadCurrentImage();
-                return Page();
+                user.fName = Input.FirstName;
+                user.lName = Input.LastName;
+                user.PhoneNumber = Input.Phone;
+                user.DOB = Input.BirthDate;
             }
+
+            // save all changes
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Profile saved successfully!";
+            return RedirectToPage("Index");
         }
 
         private string GetUserId()
