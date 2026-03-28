@@ -47,7 +47,8 @@ namespace LMS.Pages.Dashboard
                 return;
 
             // check cache for courses
-            var cachedCourses = HttpContext.Session.GetString("UserCourses");
+            var key = $"UserCourses_{CurrentUser.Id}";
+            var cachedCourses = HttpContext.Session.GetString(key);
 
             // check if cache is not null/empty
             if (!string.IsNullOrEmpty(cachedCourses))
