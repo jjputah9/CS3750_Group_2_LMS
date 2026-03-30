@@ -21,7 +21,7 @@ namespace LMS.Tests.SeleniumTests
             options.AddArgument("--ignore-certificate-errors"); // For localhost HTTPS
 
             driver = new ChromeDriver(options);
-            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
         [TestCleanup]
@@ -39,6 +39,8 @@ namespace LMS.Tests.SeleniumTests
             wait.Until(d => d.FindElement(By.Id("Input_Email"))).SendKeys("student@test1.com");
             driver.FindElement(By.Id("Input_Password")).SendKeys("NewPassword123!");
             driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+            wait.Until(d => d.FindElement(By.Id("welcome-title")));
 
             driver.Navigate().GoToUrl(baseUrl + "Registrations/Create"); // Go to registration
             wait.Until(d => d.FindElement(By.Id("Registration_Title"))); // Wait for registration
@@ -79,8 +81,12 @@ namespace LMS.Tests.SeleniumTests
             wait.Until(d => d.FindElement(By.Id("Search_Failure_Notice"))); // Wait for error notice
 
             //Next, search for one card
+            searchBar = driver.FindElement(By.Id("Registration_Search_Bar"));
+            submitBtn = driver.FindElement(By.Id("Registration_Submit_Button"));
+
             searchBar.Clear();
-            searchBar.SendKeys("TEST 0000"); // Should only be matched by one class
+            searchBar.SendKeys("TEST COURSE"); // Should only be matched by one class
+            submitBtn.Click();
 
             wait.Until(d => d.FindElement(By.CssSelector(".card"))); //Wait for cards to appear
 
@@ -107,9 +113,13 @@ namespace LMS.Tests.SeleniumTests
             wait.Until(d => d.FindElement(By.Id("Search_Failure_Notice"))); // Wait for error notice
 
             //Next, search for one card
+            searchBar = driver.FindElement(By.Id("Registration_Search_Bar"));
+            deptSelect = new SelectElement(driver.FindElement(By.Id("Registration_Dept_Select")));
+            submitBtn = driver.FindElement(By.Id("Registration_Submit_Button"));
+
             searchBar.Clear();
 
-            deptSelect.SelectByValue("TEST"); // Should only be matched by one class
+            deptSelect.SelectByText("TEST"); // Should only be matched by one class
 
             submitBtn.Click();
 
@@ -138,12 +148,16 @@ namespace LMS.Tests.SeleniumTests
             wait.Until(d => d.FindElement(By.Id("Search_Failure_Notice"))); // Wait for error notice
 
             //Next, search for one card
+            searchBar = driver.FindElement(By.Id("Registration_Search_Bar"));
+            advToggle = driver.FindElement(By.Id("toggleAdvanced"));
+            submitBtn = driver.FindElement(By.Id("Registration_Submit_Button"));
+
             searchBar.Clear();
 
             advToggle.Click();
 
             var creditHours = new SelectElement(wait.Until(d => d.FindElement(By.Id("Registration_Credit_Hours"))));
-            creditHours.SelectByValue("20"); // Only the test course should have 20 credits
+            creditHours.SelectByText("20"); // Only the test course should have 20 credits
 
             submitBtn.Click();
 

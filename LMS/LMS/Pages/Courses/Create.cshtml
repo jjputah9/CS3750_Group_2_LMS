@@ -21,8 +21,7 @@
                 <input type="hidden" asp-for="Course.InstructorName" value="placeholder" id="Course_InstructorEmail" />
 
                 <div class="form-group">
-                    <span class="text-danger">*</span>
-                    <label asp-for="Course.DeptName" class="control-label"></label>
+                    <label asp-for="Course.DeptName" class="control-label">Department</label>
                     <select asp-for="Course.DeptName" class="form-control" aria-required="true" id="Course_DeptName">
                         <option value="CS">CS</option>
                         <option value="MATH">MATH</option>
@@ -36,20 +35,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Course.CourseNum" class="control-label"></label>
-                    <input asp-for="Course.CourseNum" class="form-control" id="Course_CourseNum" />
+                    <label asp-for="Course.CourseNum" class="control-label">Course Number</label>
+                    <input asp-for="Course.CourseNum" class="form-control" id="Course_CourseNum"/>
                     <span asp-validation-for="Course.CourseNum" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <span class="text-danger">*</span>
-                    <label asp-for="Course.CourseTitle" class="control-label"></label>
+                    <label asp-for="Course.CourseTitle" class="control-label">Course Title</label>
                     <input asp-for="Course.CourseTitle" class="form-control" aria-required="true" id="Course_CourseTitle" />
                     <span asp-validation-for="Course.CourseTitle" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Course.CreditHours" class="control-label"></label>
+                    <label asp-for="Course.CreditHours" class="control-label">Credit Hours</label>
                     <input asp-for="Course.CreditHours" class="form-control" id="Course_CreditHours" />
                     <span asp-validation-for="Course.CreditHours" class="text-danger"></span>
                 </div>
@@ -67,7 +65,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Course.MeetDays" class="control-label"></label>
+                    <label asp-for="Course.MeetDays" class="control-label">Meeting Days</label>
                     <ul>
                         <li>
                             <input type="checkbox" asp-for="Course.MeetDays[0]" id="Course_MeetDays_0" />
@@ -94,16 +92,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Course.StartTime" class="control-label"></label>
+                    <label asp-for="Course.StartTime" class="control-label">Meeting Start Time</label>
                     <input asp-for="Course.StartTime" class="form-control" id="Course_StartTime" />
                     <span asp-validation-for="Course.StartTime" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Course.EndTime" class="control-label"></label>
+                    <label asp-for="Course.EndTime" class="control-label">Meeting End Time</label>
                     <input asp-for="Course.EndTime" class="form-control" id="Course_EndTime" />
                     <span asp-validation-for="Course.EndTime" class="text-danger"></span>
                 </div>
+
+                <br />
 
                 <div class="form-group">
                     <input type="submit" value="Create" class="btn btn-primary" id="CreateButton" />

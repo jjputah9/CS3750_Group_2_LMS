@@ -151,6 +151,7 @@ namespace LMS_Test
             {
                 Id = 202,
                 InstructorEmail = "instructor@test.com",
+                InstructorName = "Instructor, Test",
                 DeptName = "CS",
                 CourseNum = 1410,
                 CourseTitle = "Other Course",

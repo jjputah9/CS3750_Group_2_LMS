@@ -210,7 +210,7 @@ namespace LMS.Pages.Assignments
                 }
             }
 
-            return Page();
+            return RedirectToPage("/Assignments/StudentAssignments", new{ CourseId = Assignment?.CourseId });
         }
 
         /// <summary>

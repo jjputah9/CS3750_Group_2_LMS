@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
 
@@ -40,6 +41,8 @@ namespace LMS.Tests.SeleniumTests
             driver.FindElement(By.Id("Input_Password")).SendKeys("NewPassword123!");
             driver.FindElement(By.CssSelector("button[type='submit']")).Click();
 
+            wait.Until(d => d.FindElement(By.Id("welcome-title")));
+
             // Navigate directly to Create page
             driver.Navigate().GoToUrl(baseUrl + "Courses/Create");
 
@@ -73,7 +76,11 @@ namespace LMS.Tests.SeleniumTests
             driver.FindElement(By.Id("Course_EndTime")).SendKeys("10:00");
 
             // Submit form
-            driver.FindElement(By.CssSelector("input[type='submit']")).Click();
+            IWebElement submitBtn = driver.FindElement(By.CssSelector("input[type='submit']"));
+            new Actions(driver)
+                    .ScrollToElement(submitBtn)
+                    .Perform();
+            submitBtn.Click();
 
             // Wait for validation error
             var errorSpan = wait.Until(d => d.FindElement(By.CssSelector("span[data-valmsg-for='Course.CourseTitle']")));

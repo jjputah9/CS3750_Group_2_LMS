@@ -40,13 +40,13 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <label asp-for="Assignment.DueDate" class="control-label"></label>
+                    <label asp-for="Assignment.DueDate" class="control-label">Due Date</label>
                     <input asp-for="Assignment.DueDate" class="form-control" />
                     <span asp-validation-for="Assignment.DueDate" class="text-danger"></span>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label asp-for="Assignment.SubmissionTypeId" class="control-label"></label>
+                    <label asp-for="Assignment.SubmissionTypeId" class="control-label">Submission Type</label>
                     <select asp-for="Assignment.SubmissionTypeId"
                             class="form-control"
                             asp-items="ViewBag.SubmissionTypeId"></select>
