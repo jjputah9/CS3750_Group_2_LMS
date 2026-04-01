@@ -3,6 +3,8 @@
 @using System.Text.Json
 @using System.Linq
 @{
+    ViewData["Title"] = "Calendar";
+
     var events = Model.AllCourses.Select(item => new {
         title = item.CourseTitle,
         startTime = item.StartTime.ToString("HH:mm"),

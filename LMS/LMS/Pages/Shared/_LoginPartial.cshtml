@@ -180,15 +180,15 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-page="/StudentAccount/Index">Account</a>
-        </li>
-
-        <li class="nav-item">
             <a class="nav-link text-dark" asp-page="/Calendar/Index">Calendar</a>
         </li>
 
         @if (User.HasClaim("UserType", "Student"))
         {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-page="/StudentAccount/Index">Account</a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-page="/Registrations/Create">Registration</a>
             </li>
