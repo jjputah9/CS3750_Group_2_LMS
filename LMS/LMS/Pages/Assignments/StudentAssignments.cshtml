@@ -12,6 +12,17 @@
                 <h1 class="mb-1">@Model.CourseHeader</h1>
                 <div class="text-muted">Submit assignments for this course.</div>
             </div>
+            
+            <!-- Grade display in top right -->
+            <div class="text-end">
+                <div class="text-uppercase text-muted small">Current Grade</div>
+                <div class="d-flex align-items-center justify-content-end gap-2">
+                    <span class="badge fs-5 @GetGradeBadgeClass(Model.LetterGrade)">
+                        @Model.LetterGrade
+                    </span>
+                    <span class="fs-4 fw-bold">@Model.GradePercentage.ToString("F1")%</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -75,3 +86,18 @@
         <a class="btn btn-link px-0" asp-page="/Dashboard/Index">← Back to Dashboard</a>
     </div>
 </div>
+
+@functions {
+    string GetGradeBadgeClass(string letterGrade)
+    {
+        return letterGrade switch
+        {
+            "A" or "A-" => "bg-success",
+            "B+" or "B" or "B-" => "bg-info",
+            "C+" or "C" or "C-" => "bg-warning",
+            "D+" or "D" or "D-" => "bg-danger",
+            "F" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

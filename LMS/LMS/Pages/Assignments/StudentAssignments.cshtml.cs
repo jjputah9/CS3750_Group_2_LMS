@@ -37,6 +37,10 @@ namespace LMS.Pages.Assignments
         public int CourseId { get; set; }
         public string CourseHeader { get; set; } = "";
 
+        // Grade properties
+        public double GradePercentage { get; set; }
+        public string LetterGrade { get; set; } = "N/A";
+
         public async Task<IActionResult> OnGetAsync(int courseId)
         {
             var activeCourseId = HttpContext.Session.GetInt32("ActiveCourseId");
@@ -69,7 +73,55 @@ namespace LMS.Pages.Assignments
 
             SubmittedAssignmentIds = new HashSet<int>(submittedAssignments);
 
+            // Calculate the student's grade for this course
+            await CalculateGrade(user.Id, courseId);
+
             return Page();
+        }
+
+        private async Task CalculateGrade(string studentId, int courseId)
+        {
+            // Get all assignments for this course
+            var assignmentIds = Assignment.Select(a => a.AssignmentId).ToList();
+            
+            // Calculate total possible points
+            int totalPossiblePoints = Assignment.Sum(a => a.Points);
+
+            if (totalPossiblePoints == 0)
+            {
+                GradePercentage = 0;
+                LetterGrade = "N/A";
+                return;
+            }
+
+            // Get student's submissions and sum their grades
+            var submissions = await _context.submittedAssignments
+                .Where(s => s.StudentId == studentId && assignmentIds.Contains(s.AssignmentId))
+                .ToListAsync();
+
+            int earnedPoints = submissions.Sum(s => s.grade);
+
+            // Calculate percentage
+            GradePercentage = (double)earnedPoints / totalPossiblePoints * 100;
+
+            // Determine letter grade
+            LetterGrade = GetLetterGrade(GradePercentage);
+        }
+
+        private string GetLetterGrade(double percentage)
+        {
+            if (percentage >= 93) return "A";
+            if (percentage >= 90) return "A-";
+            if (percentage >= 87) return "B+";
+            if (percentage >= 83) return "B";
+            if (percentage >= 80) return "B-";
+            if (percentage >= 77) return "C+";
+            if (percentage >= 73) return "C";
+            if (percentage >= 70) return "C-";
+            if (percentage >= 67) return "D+";
+            if (percentage >= 63) return "D";
+            if (percentage >= 60) return "D-";
+            return "F";
         }
     }
 }
