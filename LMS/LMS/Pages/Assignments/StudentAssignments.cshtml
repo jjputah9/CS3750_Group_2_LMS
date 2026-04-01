@@ -82,10 +82,116 @@
         </div>
     }
 
+    <!-- Grade Distribution Box Plot -->
+    @if (Model.ShouldShowGradeDistribution && Model.BoxPlotData != null)
+    {
+        <div class="card mb-4 mt-4">
+            <div class="card-header">
+                <h4>Course Grade Distribution</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5><strong>Your Grade:</strong> <span class="badge bg-primary">@Model.LetterGrade (@Model.GradePercentage.ToString("F1")%)</span></h5>
+                            </div>
+                        </div>
+                        <br />
+                        <canvas id="courseGradeDistributionBoxPlot" style="max-height: 300px; width: 100%;"></canvas>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5>Grade Details</h5>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p><strong>Class Average:</strong> <span class="badge bg-info">@Model.BoxPlotData.AveragePercentage%</span></p>
+                                        <p><strong>Median:</strong> <span class="badge bg-info">@Model.BoxPlotData.Median%</span></p>
+                                        <p><strong>Highest:</strong> <span class="badge bg-success">@Model.BoxPlotData.HighestPercentage%</span></p>
+                                        <p><strong>Lowest:</strong> <span class="badge bg-danger">@Model.BoxPlotData.LowestPercentage%</span></p>
+                                        <p><strong>First Quartile:</strong> <span class="badge bg-secondary">@Model.BoxPlotData.Quartile1%</span></p>
+                                        <p><strong>Third Quartile:</strong> <span class="badge bg-secondary">@Model.BoxPlotData.Quartile3%</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="mt-3">
         <a class="btn btn-link px-0" asp-page="/Dashboard/Index">← Back to Dashboard</a>
     </div>
 </div>
+
+@if (Model.ShouldShowGradeDistribution && Model.BoxPlotData != null)
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@@sgratzl/chartjs-chart-boxplot@3.6.0/build/index.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // setup 
+            const data = {
+                labels: [''],
+                datasets: [
+                    { // Highlight user score
+                        label: 'Your Grade',
+                        type: 'line',
+                        data: [@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.GradePercentage))],
+                        pointBackgroundColor: 'rgba(13, 110, 253, 0.8)',
+                        backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                        borderColor: 'rgba(33, 37, 41, 0.8)',
+                        pointBorderColor: 'rgba(33, 37, 41, 0.8)',
+                        borderWidth: 1,
+                        pointRadius: 8
+                    },
+                    { // Box and whisker
+                        label: 'Class Grades',
+                        outlierColor: '#999999',
+                        padding: 0,
+                        outlierRadius: 0,
+                        data: [@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BoxPlotData.AllData))],
+                        type: 'boxplot',
+                        backgroundColor: 'rgba(13, 202, 240, 0.5)',
+                        borderColor: 'rgba(33, 37, 41, 0.8)',
+                        borderWidth: 1,
+                        meanRadius: 0
+                    }
+                ]
+            };
+
+            // config 
+            const config = {
+                type: 'boxplot',
+                data,
+                options: {
+                    events: null,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Grade Percentage (%)'
+                            }
+                        }
+                    }
+                }
+            };
+
+            // render init block
+            const myChart = new Chart(
+                document.getElementById('courseGradeDistributionBoxPlot'),
+                config
+            );
+        });
+    </script>
+}
 
 @functions {
     string GetGradeBadgeClass(string letterGrade)

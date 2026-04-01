@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,6 +42,10 @@ namespace LMS.Pages.Assignments
         public double GradePercentage { get; set; }
         public string LetterGrade { get; set; } = "N/A";
 
+        // Box plot data for course grade distribution
+        public CourseGradeBoxPlotData? BoxPlotData { get; set; }
+        public bool ShouldShowGradeDistribution { get; set; }
+
         public async Task<IActionResult> OnGetAsync(int courseId)
         {
             var activeCourseId = HttpContext.Session.GetInt32("ActiveCourseId");
@@ -76,6 +81,9 @@ namespace LMS.Pages.Assignments
             // Calculate the student's grade for this course
             await CalculateGrade(user.Id, courseId);
 
+            // Calculate grade distribution for box plot
+            await CalculateGradeDistribution(courseId);
+
             return Page();
         }
 
@@ -108,6 +116,63 @@ namespace LMS.Pages.Assignments
             LetterGrade = GetLetterGrade(GradePercentage);
         }
 
+        private async Task CalculateGradeDistribution(int courseId)
+        {
+            // Get all students registered in this course
+            var registeredStudentIds = await _context.Registration
+                .Where(r => r.CourseID == courseId)
+                .Select(r => r.StudentID)
+                .ToListAsync();
+
+            if (registeredStudentIds.Count == 0)
+            {
+                ShouldShowGradeDistribution = false;
+                return;
+            }
+
+            // Get all assignment IDs for this course
+            var assignmentIds = Assignment.Select(a => a.AssignmentId).ToList();
+            int totalPossiblePoints = Assignment.Sum(a => a.Points);
+
+            if (totalPossiblePoints == 0)
+            {
+                ShouldShowGradeDistribution = false;
+                return;
+            }
+
+            // Calculate each student's grade percentage
+            var studentGrades = new List<double>();
+
+            foreach (var studentId in registeredStudentIds)
+            {
+                var submissions = await _context.submittedAssignments
+                    .Where(s => s.StudentId == studentId && 
+                                assignmentIds.Contains(s.AssignmentId) &&
+                                s.GradedAt != DateTime.UnixEpoch) // Only graded submissions
+                    .ToListAsync();
+
+                // Only include students who have at least one graded submission
+                if (submissions.Any())
+                {
+                    int earnedPoints = submissions.Sum(s => s.grade);
+                    double percentage = (double)earnedPoints / totalPossiblePoints * 100;
+                    studentGrades.Add(Math.Round(percentage, 1));
+                }
+            }
+
+            // Need at least 2 students with graded work to show distribution
+            if (studentGrades.Count >= 2)
+            {
+                studentGrades.Sort();
+                BoxPlotData = new CourseGradeBoxPlotData(studentGrades.ToArray());
+                ShouldShowGradeDistribution = true;
+            }
+            else
+            {
+                ShouldShowGradeDistribution = false;
+            }
+        }
+
         private string GetLetterGrade(double percentage)
         {
             if (percentage >= 93) return "A";
@@ -122,6 +187,35 @@ namespace LMS.Pages.Assignments
             if (percentage >= 63) return "D";
             if (percentage >= 60) return "D-";
             return "F";
+        }
+    }
+
+    /// <summary>
+    /// Box plot data for course-level grade distribution (using percentages)
+    /// </summary>
+    public class CourseGradeBoxPlotData
+    {
+        public double[] AllData { get; set; }
+        public double AveragePercentage { get; set; }
+        public double Quartile1 { get; set; }
+        public double Median { get; set; }
+        public double Quartile3 { get; set; }
+        public double HighestPercentage { get; set; }
+        public double LowestPercentage { get; set; }
+
+        /// <summary>
+        /// Constructor for the course grade boxplot data, assumes the list is already sorted
+        /// </summary>
+        /// <param name="grades">Sorted array of grade percentages</param>
+        public CourseGradeBoxPlotData(double[] grades)
+        {
+            AllData = grades;
+            AveragePercentage = Math.Round(grades.Average(), 1);
+            Quartile1 = grades[(int)Math.Floor(grades.Length / 4d)];
+            Median = grades[(int)Math.Floor(grades.Length / 2d)];
+            Quartile3 = grades[(int)Math.Floor(3 * grades.Length / 4d)];
+            HighestPercentage = grades.Last();
+            LowestPercentage = grades.First();
         }
     }
 }
